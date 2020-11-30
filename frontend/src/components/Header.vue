@@ -1,46 +1,33 @@
 <template>
-  <header class="entete">
-    <nav>
-      <ul>
-        <li>
-          <router-link to="/news"> <span class="itemNav">News</span> </router-link>
-        </li>
-        <li>
-          <router-link to="/profil"><span class="itemNav">Pofile</span></router-link>
-        </li>
-        <li>
-          <router-link to="/"><span class="itemNav">Logout</span></router-link>
-        </li>
-      </ul>
-    </nav>
-    <img src="../assets/test2.png" class="logo" />
-  </header>
+  <div class="entete">
+    <div class="logo">
+      <img class="ajust" src="../assets/test2.png" />
+    </div>
+    <Burger />
+  </div>
 </template>
 <script>
+import Burger from '../components/Burger';
 export default {
   name: 'Header',
+  components: {
+    Burger,
+  },
 };
 </script>
-<style lang="css" scoped>
+<style>
 .entete {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
   background: #b2dfdb;
-  color: white;
   height: 80px;
   margin: 0 0 30px 0;
-  padding: 0 15px 0 15px;
 }
-ul {
-  display: flex;
-  align-items: center;
+.logo {
+  width: 100%;
+  text-align: center;
+  padding: 0 20px 0 0;
 }
-li {
-  margin: 10px;
-}
-.itemNav {
-  color: white;
-  text-decoration: none;
+.ajust {
+  margin: 5px 0 0 0;
 }
 </style>

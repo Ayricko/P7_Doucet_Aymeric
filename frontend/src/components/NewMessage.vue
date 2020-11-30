@@ -1,24 +1,20 @@
 <template>
   <div>
-    <div class="titre">
+    <div class="iconNewMessage">
       <v-btn color="#53AFA7" @click="showNewMessageBloc = !showNewMessageBloc">
         <v-icon color="white">
           mdi-message-text
         </v-icon>
       </v-btn>
     </div>
-    <v-card class="mx-auto" max-width="700" v-if="showNewMessageBloc">
-      <v-card color="#B2DFDB">
-        <div class="titre">
-          <h3>Nouvelle publication</h3>
-        </div>
+    <v-card class="mx-auto cardNewMessage" max-width="700" v-if="showNewMessageBloc">
+      <v-card class="titleCardNewMessage" color="#B2DFDB">
+        <h3>Nouvelle publication</h3>
       </v-card>
-      <v-form>
-        <div class="inputBloc">
-          <v-text-field v-model="msgTitle" label="Titre" required></v-text-field>
-          <v-text-field v-model="msgBody" label="Que voulez-vous dire?" required></v-text-field>
-        </div>
-        <div class="bouton">
+      <v-form class="inputBloc">
+        <v-text-field v-model="msgTitle" label="Titre" required></v-text-field>
+        <v-text-field v-model="msgBody" label="Que voulez-vous dire?" required></v-text-field>
+        <div class="boutonCardNewMessage">
           <v-btn color="#B2DFDB" @click="send">
             Publier
           </v-btn>
@@ -37,7 +33,7 @@ export default {
     return {
       msgBody: '',
       msgTitle: '',
-      showNewMessageBloc: true,
+      showNewMessageBloc: false,
     };
   },
   // async created() {
@@ -49,22 +45,30 @@ export default {
       console.log(this.msgTitle);
     },
     reset() {
-      (this.msgBody = ''), (this.msgTitle = '');
+      (this.msgBody = ''), (this.msgTitle = ''), (this.showNewMessageBloc = false);
       console.log('Annulé');
     },
   },
 };
 </script>
-<style>
-.bouton {
-  justify-content: space-around;
-}
-.titre {
+<style scoped>
+.iconNewMessage {
   display: flex;
   justify-content: center;
-  padding: 0 0 20px 0;
+}
+.cardNewMessage {
+  margin: 20px 0 20px 0;
+}
+.titleCardNewMessage {
+  text-align: center;
+  min-block-size: 50px;
+  padding: 10px 0 10px 0;
 }
 .inputBloc {
   padding: 30px;
+}
+.boutonCardNewMessage {
+  display: flex;
+  justify-content: space-around;
 }
 </style>

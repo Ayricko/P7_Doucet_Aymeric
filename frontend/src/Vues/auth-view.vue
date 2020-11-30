@@ -1,6 +1,11 @@
 <template>
   <div>
-    <Login />
+    <div class="essai">
+      <img src="../assets/test2.png" />
+    </div>
+    <div>
+      <Login />
+    </div>
   </div>
 </template>
 <script>
@@ -20,4 +25,9 @@ export default {
   computed: {},
 };
 </script>
-<style scoped lang="css"></style>
+<style>
+.essai {
+  padding: 30px 0 0 0;
+  text-align: center;
+}
+</style>

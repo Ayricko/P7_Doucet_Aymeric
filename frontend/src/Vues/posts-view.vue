@@ -2,7 +2,6 @@
   <div>
     <Header />
     <Message />
-    <br />
     <Post />
     <br />
   </div>
