@@ -10,7 +10,12 @@
     </div>
     <div>
       <router-link to="/">
-        <span class="itemNav">Déconnexion</span>
+        <span class="itemNav">
+          Déconnexion
+          <v-icon color="red">
+            mdi-power
+          </v-icon>
+        </span>
       </router-link>
     </div>
   </Slide>
@@ -48,7 +53,7 @@ export default {
 .cross-style {
   position: absolute;
   top: 12px;
-  right: 2px;
+  right: 22px;
   cursor: pointer;
 }
 .bm-cross {

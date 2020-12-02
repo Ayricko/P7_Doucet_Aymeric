@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto cardPost" max-width="700">
+  <v-card class="cardPost">
     <v-card class="titleCardPost" color="#B2DFDB">
       <h3>{{ titre }}</h3>
       <div class="signatureCardPost text--secondary">
@@ -30,7 +30,7 @@
       </div>
       <div v-if="commentBloc">
         <v-card class="commentBloc" color="#53AFA7">
-          <div class="text--secondary">{{ user }} le: {{ date }}</div>
+          <div class="text--secondary">{{ user }} - {{ date }}</div>
           <div class="bodyComment">
             {{ comments }}
           </div>
@@ -83,7 +83,8 @@ export default {
 </script>
 <style>
 .cardPost {
-  margin: 20px 0 10px 0;
+  max-width: 700px;
+  margin: 20px auto 10px auto;
 }
 .titleCardPost {
   text-align: center;
@@ -129,5 +130,10 @@ export default {
 }
 .centrage {
   margin: auto 0 auto 0;
+}
+@media screen and (max-width: 640px) {
+  .cardPost {
+    margin: 20px 20px 10px 20px;
+  }
 }
 </style>

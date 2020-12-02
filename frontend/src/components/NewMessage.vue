@@ -7,11 +7,11 @@
         </v-icon>
       </v-btn>
     </div>
-    <v-card class="mx-auto cardNewMessage" max-width="700" v-if="showNewMessageBloc">
+    <v-card class="cardNewMessage" v-if="showNewMessageBloc">
       <v-card class="titleCardNewMessage" color="#B2DFDB">
         <h3>Nouvelle publication</h3>
       </v-card>
-      <v-form class="inputBloc">
+      <form class="inputBloc">
         <v-text-field v-model="msgTitle" label="Titre" required></v-text-field>
         <v-text-field v-model="msgBody" label="Que voulez-vous dire?" required></v-text-field>
         <div class="boutonCardNewMessage">
@@ -22,7 +22,7 @@
             Annuler
           </v-btn>
         </div>
-      </v-form>
+      </form>
     </v-card>
   </div>
 </template>
@@ -57,7 +57,8 @@ export default {
   justify-content: center;
 }
 .cardNewMessage {
-  margin: 20px 0 20px 0;
+  max-width: 700px;
+  margin: 20px auto 20px auto;
 }
 .titleCardNewMessage {
   text-align: center;
@@ -70,5 +71,10 @@ export default {
 .boutonCardNewMessage {
   display: flex;
   justify-content: space-around;
+}
+@media screen and (max-width: 640px) {
+  .cardNewMessage {
+    margin: 20px 20px 10px 20px;
+  }
 }
 </style>

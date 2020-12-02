@@ -1,7 +1,7 @@
 <template>
-  <v-card class="mx-auto" max-width="700">
+  <v-card class="profilCard">
     <v-card color="#B2DFDB">
-      <div class="entete">
+      <div class="headerProfil">
         <v-avatar color="#53AFA7">
           <span class="white--text headline">AD</span>
         </v-avatar>
@@ -28,7 +28,7 @@
       </div>
       <div class="bouton">
         <v-btn color="#B2DFDB" @click="send">
-          Enregister les modifications
+          Enregister
         </v-btn>
         <v-btn color="#B2DFDB" @click="reset">
           Annuler
@@ -69,15 +69,28 @@ export default {
 };
 </script>
 <style>
-.entete {
+.profilCard {
+  max-width: 700px;
+  margin: 50px auto 0 auto;
+}
+.headerProfil {
   display: flex;
   justify-content: space-around;
   padding: 20px 0;
+}
+.bouton {
+  display: flex;
+  justify-content: space-around;
 }
 .centrage {
   margin: auto 0 auto 0;
 }
 .inputForm {
   padding: 30px 30px 15px 30px;
+}
+@media screen and (max-width: 640px) {
+  .profilCard {
+    margin: 20px 20px 0 20px;
+  }
 }
 </style>

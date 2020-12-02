@@ -1,8 +1,8 @@
 <template>
-  <div class="entete">
-    <div class="logo">
-      <img class="ajust" src="../assets/test2.png" />
-    </div>
+  <div class="header">
+    <span class="iconL logo"><img class="ajust" src="../assets/logo.png"/></span>
+    <span class="iconS logo"><img src="../assets/logoSeul.png"/></span>
+
     <Burger />
   </div>
 </template>
@@ -16,18 +16,27 @@ export default {
 };
 </script>
 <style>
-.entete {
-  align-items: center;
+.header {
+  display: flex;
   background: #b2dfdb;
   height: 80px;
   margin: 0 0 30px 0;
+  align-items: center;
+  text-align: right;
 }
 .logo {
   width: 100%;
-  text-align: center;
+  text-align: right;
   padding: 0 20px 0 0;
 }
-.ajust {
-  margin: 5px 0 0 0;
+@media screen and (max-width: 640px) {
+  .iconL {
+    display: none;
+  }
+}
+@media screen and (min-width: 641px) {
+  .iconS {
+    display: none;
+  }
 }
 </style>

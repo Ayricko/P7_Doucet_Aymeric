@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card class="mx-auto card" max-width="700" v-if="showLogin">
+    <v-card class="authCard" v-if="showLogin">
       <v-toolbar color="#B2DFDB">
         <h3>Connectez-vous</h3>
       </v-toolbar>
@@ -33,7 +33,7 @@
         </div>
       </form>
     </v-card>
-    <v-card class="mx-auto card" max-width="700" v-else>
+    <v-card class="authCard" v-else>
       <v-toolbar color="#B2DFDB">
         <h3>Inscription</h3>
       </v-toolbar>
@@ -53,7 +53,7 @@
             hint="Minimum 8 caractères"
             @click:append="show1 = !show1"
           ></v-text-field>
-          <div class="bouton">
+          <div class="registerButton">
             <v-btn color="#B2DFDB" @click="submit">
               Inscription
             </v-btn>
@@ -101,8 +101,9 @@ export default {
 .register {
   cursor: pointer;
 }
-.card {
-  margin-top: 50px;
+.authCard {
+  max-width: 700px;
+  margin: 50px auto 0 auto;
 }
 .inputBloc {
   padding: 30px;
@@ -112,7 +113,16 @@ export default {
   justify-content: center;
   padding: 0 0 30px 0;
 }
+.registerButton {
+  display: flex;
+  justify-content: space-around;
+}
 a {
   text-decoration: none;
+}
+@media screen and (max-width: 640px) {
+  .authCard {
+    margin: 20px 20px 10px 20px;
+  }
 }
 </style>

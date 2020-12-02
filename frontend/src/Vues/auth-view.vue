@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="essai">
-      <img src="../assets/test2.png" />
+    <div class="logoAuth">
+      <img src="../assets/logo.png" />
     </div>
     <div>
       <Login />
@@ -26,7 +26,7 @@ export default {
 };
 </script>
 <style>
-.essai {
+.logoAuth {
   padding: 30px 0 0 0;
   text-align: center;
 }
