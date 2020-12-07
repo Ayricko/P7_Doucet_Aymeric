@@ -12,8 +12,11 @@
         <h3>Nouvelle publication</h3>
       </v-card>
       <form class="inputBloc">
-        <v-text-field v-model="msgTitle" label="Titre" required></v-text-field>
-        <v-text-field v-model="msgBody" label="Que voulez-vous dire?" required></v-text-field>
+        <v-text-field v-model="title" label="Titre" required></v-text-field>
+        <v-text-field v-model="postId" label="Test Post Id" required></v-text-field>
+        <v-text-field v-model="body" label="Que voulez-vous dire?" required></v-text-field>
+        <v-text-field v-model="user" label="Qui êtes vous?" required></v-text-field>
+        <v-text-field v-model="date" label="On est le?" required></v-text-field>
         <div class="boutonCardNewMessage">
           <v-btn color="#B2DFDB" @click="send">
             Publier
@@ -27,26 +30,32 @@
   </div>
 </template>
 <script>
-// import axios from 'axios';
+import axios from 'axios';
 export default {
   data() {
-    return {
-      msgBody: '',
-      msgTitle: '',
-      showNewMessageBloc: false,
-    };
+    return { title: '', postId: '', body: '', user: '', date: '', userId: '', like: '', comments: [], showNewMessageBloc: false };
   },
-  // async created() {
-  //   this.messages = (await axios.get('http://localhost:3000/messages')).data;
-  // },
   methods: {
     send() {
-      console.log(this.msgBody);
-      console.log(this.msgTitle);
+      axios
+        .post('http://localhost:3000/posts', {
+          title: this.title,
+          postId: this.postId,
+          body: this.body,
+          user: this.user,
+          date: this.date,
+          userId: '',
+          like: '',
+          comments: [],
+        })
+        .then((response) => {
+          const data = response.data;
+          console.log(data);
+        });
+      (this.postId = ''), (this.title = ''), (this.body = ''), (this.user = ''), (this.date = ''), (this.showNewMessageBloc = false);
     },
     reset() {
-      (this.msgBody = ''), (this.msgTitle = ''), (this.showNewMessageBloc = false);
-      console.log('Annulé');
+      (this.postId = ''), (this.title = ''), (this.body = ''), (this.user = ''), (this.date = ''), (this.showNewMessageBloc = false);
     },
   },
 };

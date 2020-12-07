@@ -1,87 +1,95 @@
 <template>
-  <v-card class="cardPost">
-    <v-card class="titleCardPost" color="#B2DFDB">
-      <h3>{{ titre }}</h3>
-      <div class="signatureCardPost text--secondary">
-        <div class="avatarBloc">
-          <v-avatar color="#53AFA7">
-            <span class="white--text headline">AD</span>
-          </v-avatar>
-          <div class="avatarSpace">{{ user }}</div>
-        </div>
-        <div class="centrage">
-          {{ date }}
-        </div>
-      </div>
-    </v-card>
-    <div class="postBloc">{{ message }}</div>
-    <v-card class="commentCard" color="#B2DFDB">
-      <div class="iconBloc">
-        <v-btn color="#53AFA7" @click="commentBloc = !commentBloc">
-          <v-icon color="white">
-            mdi-message-text
-          </v-icon>
-        </v-btn>
-        <v-btn color="#53AFA7" @click="like">
-          <v-icon color="white">
-            mdi-heart
-          </v-icon>
-        </v-btn>
-      </div>
-      <div v-if="commentBloc">
-        <v-card class="commentBloc" color="#53AFA7">
-          <div class="text--secondary">{{ user }} - {{ date }}</div>
-          <div class="bodyComment">
-            {{ comments }}
+  <div>
+    <div v-for="post in posts" :key="post.postId">
+      <v-card class="cardPost">
+        <v-card class="titleCardPost" color="#B2DFDB">
+          <h3>{{ post.title }}</h3>
+          <div class="signatureCardPost text--secondary">
+            <div class="avatarBloc">
+              <v-avatar color="#53AFA7">
+                <span class="white--text headline">AD</span>
+              </v-avatar>
+              <div class="avatarSpace">{{ post.user }}</div>
+            </div>
+            <div class="centrage">
+              {{ post.date }}
+            </div>
           </div>
         </v-card>
-      </div>
-      <div class="commentFieldBloc">
-        <div class="commentField">
-          <v-text-field label="Commentaire" placeholder="Commentaire"></v-text-field>
-        </div>
-        <div class="centrage">
-          <v-btn small color="#53AFA7" @click="sendComment">
-            <v-icon color="white">
-              mdi-send
-            </v-icon>
-          </v-btn>
-        </div>
-      </div>
-    </v-card>
-  </v-card>
+        <div class="postBloc">{{ post.body }}</div>
+        <v-card class="commentCard" color="#B2DFDB">
+          <div class="iconBloc">
+            <v-btn color="#53AFA7" @click="commentBloc = !commentBloc">
+              <v-icon color="white">
+                mdi-message-text
+              </v-icon>
+            </v-btn>
+            <v-btn color="#53AFA7" @click="like">
+              <v-icon color="white">
+                mdi-heart
+              </v-icon>
+              <div class="colorLike">{{ post.like }}</div>
+            </v-btn>
+          </div>
+          <div v-for="comment in post.comments" :key="comment.id">
+            <div v-show="commentBloc">
+              <v-card class="commentBloc" color="#53AFA7">
+                <div class="text--secondary">{{ comment.user }} - {{ comment.date }}</div>
+                <div class="bodyComment">
+                  {{ comment.body }}
+                </div>
+              </v-card>
+            </div>
+          </div>
+          <div class="commentFieldBloc">
+            <div class="commentField">
+              <v-text-field v-model="comment" label="Commentaire" placeholder="Commentaire"></v-text-field>
+            </div>
+            <div class="centrage">
+              <v-btn small color="#53AFA7" @click="sendComment">
+                <v-icon color="white">
+                  mdi-send
+                </v-icon>
+              </v-btn>
+            </div>
+          </div>
+        </v-card>
+      </v-card>
+    </div>
+  </div>
 </template>
 
 <script>
-// import axios from 'axios';
+import axios from 'axios';
 export default {
   components: {},
   data() {
     return {
       commentBloc: false,
-      titre: 'Titre du post',
-      message:
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-      user: 'Aymeric Doucet',
-      date: '26/11/2020 - 12:35',
-      comments: 'test',
+      posts: [],
+      comment: [],
     };
   },
+  created() {
+    axios.get('http://localhost:3000/posts').then((response) => (this.posts = response.data));
+  },
+
   methods: {
-    //   async created() {
-    //     this.message = (await axios.get('http://localhost:3000/messages')).data;
-    //   },
     like() {
       console.log('liké');
     },
     sendComment() {
-      console.log('Commentaire posté');
-      this.comments = '';
+      console.log(this.comment);
+      this.comment = '';
     },
   },
 };
 </script>
 <style>
+.colorLike {
+  color: white;
+  margin: 0 0 0 5px;
+}
 .cardPost {
   max-width: 700px;
   margin: 20px auto 10px auto;
