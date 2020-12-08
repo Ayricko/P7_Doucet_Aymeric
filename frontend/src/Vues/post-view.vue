@@ -1,5 +1,7 @@
 <template>
   <div>
+    <Header />
+    <Message @updated="displayNewPost" />
     <div v-for="post in posts" :key="post.postId">
       <v-card class="cardPost">
         <v-card class="titleCardPost" color="#B2DFDB">
@@ -61,8 +63,10 @@
 
 <script>
 import axios from 'axios';
+import Header from '../components/Header';
+import Message from '../components/NewMessage';
 export default {
-  components: {},
+  components: { Message, Header },
   data() {
     return {
       commentBloc: false,
@@ -81,6 +85,9 @@ export default {
     sendComment() {
       console.log(this.comment);
       this.comment = '';
+    },
+    displayNewPost(newPost) {
+      this.posts.push(newPost);
     },
   },
 };

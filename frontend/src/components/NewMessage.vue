@@ -37,21 +37,12 @@ export default {
   },
   methods: {
     send() {
-      axios
-        .post('http://localhost:3000/posts', {
-          title: this.title,
-          postId: this.postId,
-          body: this.body,
-          user: this.user,
-          date: this.date,
-          userId: '',
-          like: '',
-          comments: [],
-        })
-        .then((response) => {
-          const data = response.data;
-          console.log(data);
-        });
+      const newPost = { title: this.title, postId: this.postId, body: this.body, user: this.user, date: this.date, userId: '', like: '', comments: [] };
+      axios.post('http://localhost:3000/posts', newPost).then((response) => {
+        const data = response.data;
+        console.log(data);
+        this.$emit('updated', newPost);
+      });
       (this.postId = ''), (this.title = ''), (this.body = ''), (this.user = ''), (this.date = ''), (this.showNewMessageBloc = false);
     },
     reset() {

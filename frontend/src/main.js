@@ -6,7 +6,7 @@ Vue.config.productionTip = false;
 Vue.use(VueRouter);
 
 import AuthView from './Vues/auth-view.vue';
-import PostsView from './Vues/posts-view.vue';
+import PostsView from './Vues/post-view.vue';
 import ProfilView from './Vues/profil-view.vue';
 
 import App from './App.vue';
