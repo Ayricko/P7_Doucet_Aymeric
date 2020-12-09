@@ -6,7 +6,7 @@ const asyncLib = require('async');
 
 // Constants
 const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const PASSWORD_REGEX = /^(?=.*\d).{4,8}$/;
+const PASSWORD_REGEX = /^(?=.*\d).{4,15}$/;
 
 // Routes
 module.exports = {
@@ -21,10 +21,10 @@ module.exports = {
       return res.status(400).json({ error: 'missing parameters' });
     }
 
-    if (lastName.length >= 13 || lastName.length <= 4) {
+    if (lastName.length >= 13 || lastName.length <= 2) {
       return res.status(400).json({ error: 'wrong lastName (must be length 5 - 12)' });
     }
-    if (firstName.length >= 13 || firstName.length <= 4) {
+    if (firstName.length >= 13 || firstName.length <= 2) {
       return res.status(400).json({ error: 'wrong firstName (must be length 5 - 12)' });
     }
 
@@ -160,12 +160,13 @@ module.exports = {
 
     // Params
     const firstName = req.body.firstName;
+    const lastName = req.body.lastName;
 
     asyncLib.waterfall(
       [
         (done) => {
           models.User.findOne({
-            attributes: ['id', 'firstName'],
+            attributes: ['id', 'firstName', 'lastName'],
             where: { id: userId },
           })
             .then((userFound) => {
@@ -178,6 +179,7 @@ module.exports = {
             userFound
               .update({
                 firstName: firstName ? firstName : userFound.firstName,
+                lastName: lastName ? lastName : userFound.lastName,
               })
               .then(() => {
                 done(userFound);
