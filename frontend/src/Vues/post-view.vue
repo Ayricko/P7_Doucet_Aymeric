@@ -11,14 +11,14 @@
               <v-avatar color="#53AFA7">
                 <span class="white--text headline">AD</span>
               </v-avatar>
-              <div class="avatarSpace">{{ post.user }}</div>
+              <div class="avatarSpace">{{ post.User.firstName }}</div>
             </div>
             <div class="centrage">
-              {{ post.date }}
+              {{ post.createdAt }}
             </div>
           </div>
         </v-card>
-        <div class="postBloc">{{ post.body }}</div>
+        <div class="postBloc">{{ post.content }}</div>
         <v-card class="commentCard" color="#B2DFDB">
           <div class="iconBloc">
             <v-btn color="#53AFA7" @click="commentBloc = !commentBloc">
@@ -75,7 +75,7 @@ export default {
     };
   },
   created() {
-    axios.get('http://localhost:3000/posts').then((response) => (this.posts = response.data));
+    axios.get('http://localhost:3000/api/posts').then((response) => (this.posts = response.data));
   },
 
   methods: {

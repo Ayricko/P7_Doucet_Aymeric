@@ -21,7 +21,7 @@
         </div>
         <div class="bouton">
           <router-link to="/news">
-            <v-btn color="#B2DFDB" @click="connect">
+            <v-btn color="#B2DFDB" @click="login">
               Connection
             </v-btn>
           </router-link>
@@ -54,7 +54,7 @@
             @click:append="show1 = !show1"
           ></v-text-field>
           <div class="registerButton">
-            <v-btn color="#B2DFDB" @click="submit">
+            <v-btn color="#B2DFDB" @click="register">
               Inscription
             </v-btn>
             <v-btn color="#B2DFDB" @click="showLogin = !showLogin">
@@ -68,6 +68,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   data() {
     return {
@@ -84,15 +85,19 @@ export default {
     };
   },
   methods: {
-    connect() {
-      console.log(this.email);
-      console.log(this.password);
+    login() {
+      const userLogin = { email: this.email, password: this.password };
+      axios.post('http://localhost:3000/api/users/login', userLogin).then((response) => {
+        console.log(response);
+        console.log('connection réussie');
+      });
     },
-    submit() {
-      console.log(this.lastName);
-      console.log(this.firstName);
-      console.log(this.email);
-      console.log(this.password);
+    register() {
+      const userRegister = { email: this.email, firstName: this.firstName, lastName: this.lastName, password: this.password };
+      axios.post('http://localhost:3000/api/users/register', userRegister).then((response) => {
+        console.log(response);
+        console.log('Compte utilisateur crée');
+      });
     },
   },
 };

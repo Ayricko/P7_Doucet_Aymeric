@@ -2,6 +2,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const apiRouter = require('./apiRouter').router;
+const cors = require('cors');
 
 // Instantiate Server
 const app = express();
@@ -11,6 +12,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Configure Routes
+app.use(cors());
 app.get('/', (req, res) => {
   res.setHeader('Content-type', 'text/html');
   res.status(200).send('<h1>Bonjour</h1>');

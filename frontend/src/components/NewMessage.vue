@@ -13,10 +13,7 @@
       </v-card>
       <form class="inputBloc">
         <v-text-field v-model="title" label="Titre" required></v-text-field>
-        <v-text-field v-model="postId" label="Test Post Id" required></v-text-field>
-        <v-text-field v-model="body" label="Que voulez-vous dire?" required></v-text-field>
-        <v-text-field v-model="user" label="Qui êtes vous?" required></v-text-field>
-        <v-text-field v-model="date" label="On est le?" required></v-text-field>
+        <v-text-field v-model="content" label="Que voulez-vous dire?" required></v-text-field>
         <div class="boutonCardNewMessage">
           <v-btn color="#B2DFDB" @click="send">
             Publier
@@ -33,20 +30,20 @@
 import axios from 'axios';
 export default {
   data() {
-    return { title: '', postId: '', body: '', user: '', date: '', userId: '', like: '', comments: [], showNewMessageBloc: false };
+    return { title: '', content: '', showNewMessageBloc: false };
   },
   methods: {
     send() {
-      const newPost = { title: this.title, postId: this.postId, body: this.body, user: this.user, date: this.date, userId: '', like: '', comments: [] };
+      const newPost = { title: this.title, content: this.content };
       axios.post('http://localhost:3000/posts', newPost).then((response) => {
         const data = response.data;
         console.log(data);
         this.$emit('updated', newPost);
       });
-      (this.postId = ''), (this.title = ''), (this.body = ''), (this.user = ''), (this.date = ''), (this.showNewMessageBloc = false);
+      (this.title = ''), (this.content = ''), (this.showNewMessageBloc = false);
     },
     reset() {
-      (this.postId = ''), (this.title = ''), (this.body = ''), (this.user = ''), (this.date = ''), (this.showNewMessageBloc = false);
+      (this.title = ''), (this.content = ''), (this.showNewMessageBloc = false);
     },
   },
 };
