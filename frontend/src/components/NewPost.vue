@@ -1,20 +1,20 @@
 <template>
   <div>
-    <div class="iconNewMessage">
-      <v-btn color="#53AFA7" @click="showNewMessageBloc = !showNewMessageBloc">
+    <div class="iconNewPost">
+      <v-btn color="#53AFA7" @click="showNewPostBloc = !showNewPostBloc">
         <v-icon color="white">
           mdi-message-text
         </v-icon>
       </v-btn>
     </div>
-    <v-card class="cardNewMessage" v-if="showNewMessageBloc">
-      <v-card class="titleCardNewMessage" color="#B2DFDB">
+    <v-card class="cardNewPost" v-if="showNewPostBloc">
+      <v-card class="titleCardNewPost" color="#B2DFDB">
         <h3>Nouvelle publication</h3>
       </v-card>
       <form class="inputBloc">
         <v-text-field v-model="title" label="Titre" required></v-text-field>
         <v-text-field v-model="content" label="Que voulez-vous dire?" required></v-text-field>
-        <div class="boutonCardNewMessage">
+        <div class="boutonCardNewPost">
           <v-btn color="#B2DFDB" @click="send">
             Publier
           </v-btn>
@@ -30,34 +30,35 @@
 import axios from 'axios';
 export default {
   data() {
-    return { title: '', content: '', showNewMessageBloc: false };
+    return { title: '', content: '', showNewPostBloc: false };
   },
   methods: {
     send() {
+      const token = localStorage.getItem('acces_token');
       const newPost = { title: this.title, content: this.content };
-      axios.post('http://localhost:3000/posts', newPost).then((response) => {
+      axios.post('http://localhost:3000/api/posts/new', newPost, { headers: { 'Content-Type': 'application/json', Authorization: token } }).then((response) => {
         const data = response.data;
-        console.log(data);
+        console.log(data.status);
         this.$emit('updated', newPost);
       });
-      (this.title = ''), (this.content = ''), (this.showNewMessageBloc = false);
+      (this.title = ''), (this.content = ''), (this.showNewPostBloc = false);
     },
     reset() {
-      (this.title = ''), (this.content = ''), (this.showNewMessageBloc = false);
+      (this.title = ''), (this.content = ''), (this.showNewPostBloc = false);
     },
   },
 };
 </script>
 <style scoped>
-.iconNewMessage {
+.iconNewPost {
   display: flex;
   justify-content: center;
 }
-.cardNewMessage {
+.cardNewPost {
   max-width: 700px;
   margin: 20px auto 20px auto;
 }
-.titleCardNewMessage {
+.titleCardNewPost {
   text-align: center;
   min-block-size: 50px;
   padding: 10px 0 10px 0;
@@ -65,12 +66,12 @@ export default {
 .inputBloc {
   padding: 30px;
 }
-.boutonCardNewMessage {
+.boutonCardNewPost {
   display: flex;
   justify-content: space-around;
 }
 @media screen and (max-width: 640px) {
-  .cardNewMessage {
+  .cardNewPost {
     margin: 20px 20px 10px 20px;
   }
 }

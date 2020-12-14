@@ -88,14 +88,16 @@ export default {
     login() {
       const userLogin = { email: this.email, password: this.password };
       axios.post('http://localhost:3000/api/users/login', userLogin).then((response) => {
-        console.log(response);
+        console.log(response.status);
+        const token = response.data.token;
+        localStorage.setItem('acces_token', token);
         console.log('connection réussie');
       });
     },
     register() {
       const userRegister = { email: this.email, firstName: this.firstName, lastName: this.lastName, password: this.password };
       axios.post('http://localhost:3000/api/users/register', userRegister).then((response) => {
-        console.log(response);
+        console.log(response.status);
         console.log('Compte utilisateur crée');
       });
     },

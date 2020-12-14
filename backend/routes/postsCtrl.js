@@ -73,7 +73,7 @@ module.exports = {
     }
 
     models.Post.findAll({
-      order: [order != null ? order.split(':') : ['title', 'ASC']],
+      order: [order != null ? order.split(':') : ['createdAt', 'DESC']],
       attirbutes: fields !== '*' && fields != null ? fields.split(',') : null,
       limit: !isNaN(limit) ? limit : null,
       offset: !isNaN(offset) ? offset : null,

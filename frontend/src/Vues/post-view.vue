@@ -1,7 +1,7 @@
 <template>
   <div>
     <Header />
-    <Message @updated="displayNewPost" />
+    <Post @updated="displayNewPost" />
     <div v-for="post in posts" :key="post.postId">
       <v-card class="cardPost">
         <v-card class="titleCardPost" color="#B2DFDB">
@@ -13,9 +13,7 @@
               </v-avatar>
               <div class="avatarSpace">{{ post.User.firstName }}</div>
             </div>
-            <div class="centrage">
-              {{ post.createdAt }}
-            </div>
+            <div class="centrage">le: {{ post.createdAt }}</div>
           </div>
         </v-card>
         <div class="postBloc">{{ post.content }}</div>
@@ -64,9 +62,9 @@
 <script>
 import axios from 'axios';
 import Header from '../components/Header';
-import Message from '../components/NewMessage';
+import Post from '../components/NewPost';
 export default {
-  components: { Message, Header },
+  components: { Post, Header },
   data() {
     return {
       commentBloc: false,
@@ -75,7 +73,10 @@ export default {
     };
   },
   created() {
-    axios.get('http://localhost:3000/api/posts').then((response) => (this.posts = response.data));
+    axios.get('http://localhost:3000/api/posts').then((response) => {
+      this.posts = response.data;
+      console.log(this.posts);
+    });
   },
 
   methods: {

@@ -10,7 +10,7 @@
     </div>
     <div>
       <router-link to="/">
-        <span class="itemNav">
+        <span class="itemNav" @click="logout">
           Déconnexion
           <v-icon color="red">
             mdi-power
@@ -26,6 +26,11 @@ import { Slide } from 'vue-burger-menu';
 export default {
   components: {
     Slide,
+  },
+  methods: {
+    logout() {
+      localStorage.removeItem('acces_token');
+    },
   },
 };
 </script>

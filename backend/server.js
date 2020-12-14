@@ -13,11 +13,6 @@ app.use(bodyParser.json());
 
 // Configure Routes
 app.use(cors());
-app.get('/', (req, res) => {
-  res.setHeader('Content-type', 'text/html');
-  res.status(200).send('<h1>Bonjour</h1>');
-});
-
 app.use('/api/', apiRouter);
 
 // Launch Server

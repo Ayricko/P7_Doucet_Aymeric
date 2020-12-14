@@ -150,7 +150,7 @@ module.exports = {
         }
       })
       .catch((err) => {
-        res.status(500).json({ error: 'cannot fetch fucking user' });
+        res.status(500).json({ error: 'cannot fetch user' });
       });
   },
   updateUserProfile: (req, res) => {

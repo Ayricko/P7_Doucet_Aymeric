@@ -14,7 +14,7 @@
       <div class="inputForm">
         <v-text-field v-model="lastName" label="Nom" placeholder="Nom" required></v-text-field>
         <v-text-field v-model="firstName" label="Prénom" placeholder="Prénom" required></v-text-field>
-        <v-text-field
+        <!-- <v-text-field
           v-model="password"
           :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
           :rules="[rules.required, rules.min]"
@@ -24,7 +24,7 @@
           placeholder="Mot de passe"
           hint="Minimum 8 caractères"
           @click:append="show1 = !show1"
-        ></v-text-field>
+        ></v-text-field> -->
       </div>
       <div class="bouton">
         <v-btn color="#B2DFDB" @click="send">
@@ -39,11 +39,11 @@
 </template>
 
 <script>
-// import axios from 'axios';
+import axios from 'axios';
 export default {
   data() {
     return {
-      user: 'Aymeric DOUCET',
+      user: '',
       lastName: '',
       firstName: '',
       password: '',
@@ -54,12 +54,24 @@ export default {
       },
     };
   },
+  created() {
+    const token = localStorage.getItem('acces_token');
+    axios.get('http://localhost:3000/api/users/profile', { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `${token}` } }).then((response) => {
+      this.user = response.data.lastName + ' ' + response.data.firstName;
+    });
+  },
   methods: {
-    //   async created() {
-    //     this.message = (await axios.get('http://localhost:3000/messages')).data;
-    //   },
     send() {
-      console.log('Envoyé');
+      const token = localStorage.getItem('acces_token');
+      const userUpdate = { firstName: this.firstName, lastName: this.lastName };
+      axios
+        .put('http://localhost:3000/api/users/profile', userUpdate, { headers: { 'Content-Type': 'application/json', Authorization: `${token}` } })
+        .then((response) => {
+          console.log(response.status);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
     reset() {
       (this.lastName = ''), (this.firstName = ''), (this.password = '');
