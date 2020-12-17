@@ -62,11 +62,14 @@ export default {
   },
   methods: {
     send() {
+      const router = this.$router;
       const token = localStorage.getItem('acces_token');
       const userUpdate = { firstName: this.firstName, lastName: this.lastName };
       axios
         .put('http://localhost:3000/api/users/profile', userUpdate, { headers: { 'Content-Type': 'application/json', Authorization: `${token}` } })
         .then((response) => {
+          router.push('/news');
+          alert('Mise à jour effectué');
           console.log(response.status);
         })
         .catch((err) => {

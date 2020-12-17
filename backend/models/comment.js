@@ -12,12 +12,19 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: {
           allowNull: false,
         },
-      });
+        onDelete: 'CASCADE',
+      }),
+        models.Comment.belongsTo(models.Post, {
+          foreignKey: {
+            allowNull: false,
+          },
+          onDelete: 'CASCADE',
+        });
     }
   }
   Comment.init(
     {
-      body: DataTypes.STRING,
+      content: DataTypes.STRING,
     },
     {
       sequelize,

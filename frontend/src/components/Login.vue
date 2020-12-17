@@ -20,11 +20,9 @@
           ></v-text-field>
         </div>
         <div class="bouton">
-          <router-link to="/news">
-            <v-btn color="#B2DFDB" @click="login">
-              Connection
-            </v-btn>
-          </router-link>
+          <v-btn color="#B2DFDB" @click="login">
+            Connection
+          </v-btn>
         </div>
         <div class="bouton">
           <div class="register" @click="showLogin = !showLogin">
@@ -87,19 +85,36 @@ export default {
   methods: {
     login() {
       const userLogin = { email: this.email, password: this.password };
-      axios.post('http://localhost:3000/api/users/login', userLogin).then((response) => {
-        console.log(response.status);
-        const token = response.data.token;
-        localStorage.setItem('acces_token', token);
-        console.log('connection réussie');
-      });
+      const router = this.$router;
+      axios
+        .post('http://localhost:3000/api/users/login', userLogin)
+        .then((response) => {
+          if (response.status === 201) {
+            console.log(response.status);
+            const token = response.data.token;
+            localStorage.setItem('acces_token', token);
+            router.push('/news');
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          alert("Probleme d'authentification");
+        });
     },
     register() {
       const userRegister = { email: this.email, firstName: this.firstName, lastName: this.lastName, password: this.password };
-      axios.post('http://localhost:3000/api/users/register', userRegister).then((response) => {
-        console.log(response.status);
-        console.log('Compte utilisateur crée');
-      });
+      axios
+        .post('http://localhost:3000/api/users/register', userRegister)
+        .then((response) => {
+          if (response.status === 201) {
+            console.log(response);
+            console.log(response.status);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          alert("Probleme d'authentification");
+        });
     },
   },
 };

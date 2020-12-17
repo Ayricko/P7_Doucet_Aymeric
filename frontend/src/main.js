@@ -2,6 +2,12 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import vuetify from './plugins/vuetify';
 
+const moment = require('moment'); // gestion de l'affichage des dates avec vue-moment
+require('moment/locale/fr');
+Vue.use(require('vue-moment'), {
+  moment,
+});
+
 Vue.config.productionTip = false;
 Vue.use(VueRouter);
 

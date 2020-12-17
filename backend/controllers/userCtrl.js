@@ -75,6 +75,7 @@ module.exports = {
         if (newUser) {
           return res.status(201).json({
             userId: newUser.id,
+            token: jwtUtils.generateTokenForUser(newUser),
           });
         } else {
           return res.status(500).json({ error: 'cannot add user' });
@@ -82,6 +83,7 @@ module.exports = {
       }
     );
   },
+
   login: (req, res) => {
     // Params
     const email = req.body.email;
@@ -131,6 +133,7 @@ module.exports = {
       }
     );
   },
+
   getUserProfile: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
@@ -153,6 +156,7 @@ module.exports = {
         res.status(500).json({ error: 'cannot fetch user' });
       });
   },
+
   updateUserProfile: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
@@ -200,5 +204,28 @@ module.exports = {
         }
       }
     );
+  },
+
+  deleteUserProfile: (req, res) => {
+    // Getting auth header
+    const headerAuth = req.headers['authorization'];
+    const userId = jwtUtils.getUserId(headerAuth);
+
+    if (userId < 0) return res.status(400).json({ error: 'wrong token' });
+
+    models.User.findOne({
+      where: { id: userId },
+    })
+      .then((user) => {
+        if (user) {
+          user.destroy(user);
+          res.status(200).json({ message: 'user deleted' });
+        } else {
+          res.status(404).json({ error: 'user not found' });
+        }
+      })
+      .catch((err) => {
+        res.status(500).json({ error: 'cannot fetch user' });
+      });
   },
 };

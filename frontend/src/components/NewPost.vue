@@ -39,7 +39,7 @@ export default {
       axios.post('http://localhost:3000/api/posts/new', newPost, { headers: { 'Content-Type': 'application/json', Authorization: token } }).then((response) => {
         const data = response.data;
         console.log(data.status);
-        this.$emit('updated', newPost);
+        this.$router.push('/news');
       });
       (this.title = ''), (this.content = ''), (this.showNewPostBloc = false);
     },

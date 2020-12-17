@@ -13,7 +13,9 @@
               </v-avatar>
               <div class="avatarSpace">{{ post.User.firstName }}</div>
             </div>
-            <div class="centrage">le: {{ post.createdAt }}</div>
+            <div class="centrage">
+              {{ post.createdAt | moment('calendar') }}
+            </div>
           </div>
         </v-card>
         <div class="postBloc">{{ post.content }}</div>
