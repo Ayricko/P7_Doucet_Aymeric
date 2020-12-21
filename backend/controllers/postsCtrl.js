@@ -55,7 +55,7 @@ module.exports = {
       ],
       (newPost) => {
         if (newPost) {
-          return res.status(200).json(newPost);
+          return res.status(201).json(newPost);
         } else {
           return res.status(500).json({ error: 'cannot post this Post' });
         }
@@ -121,19 +121,19 @@ module.exports = {
         (userFound, done) => {
           if (userFound) {
             models.Post.findOne({
-              attributes: ['id', 'title', 'content'],
+              attributes: ['id', 'title', 'content', 'UserId'],
               where: { id: postId },
             })
               .then((post) => {
-                done(null, post);
+                done(null, post, userFound);
               })
               .catch((err) => res.status(500).json({ error: 'unable to verify user' }));
           } else {
             res.status(404).json({ error: 'user not found' });
           }
         },
-        (post, done) => {
-          if (post) {
+        (post, userFound, done) => {
+          if (post.UserId === userFound.id) {
             post
               .update({
                 title: title ? title : post.title,
@@ -146,7 +146,7 @@ module.exports = {
                 res.status(500).json({ error: 'cannot update post' });
               });
           } else {
-            res.status(404).json({ error: 'Post not found' });
+            res.status(404).json({ error: 'This user is not allowed to update this post' });
           }
         },
       ],
@@ -172,7 +172,7 @@ module.exports = {
       [
         (done) => {
           models.User.findOne({
-            attributes: ['id', 'firstName', 'lastName'],
+            attributes: ['id'],
             where: { id: userId },
           })
             .then((userFound) => {
@@ -183,22 +183,23 @@ module.exports = {
         (userFound, done) => {
           if (userFound) {
             models.Post.findOne({
+              attributes: ['id', 'UserId'],
               where: { id: postId },
             })
               .then((post) => {
-                done(null, post);
+                done(null, post, userFound);
               })
               .catch((err) => res.status(500).json({ error: 'unable to verify user' }));
           } else {
             res.status(404).json({ error: 'user not found' });
           }
-        },
-        (post, done) => {
-          if (post) {
+        }, // recupère les commentaire lié au post, supprimer les commentaire, et ensuite supprimer
+        (post, userFound, done) => {
+          if (post.UserId === userFound.id) {
             post.destroy(post);
             res.status(200).json({ message: 'Post deleted' });
           } else {
-            res.status(404).json({ error: 'Post not found' });
+            res.status(404).json({ error: 'This user is not allowed to delete this post' });
           }
         },
       ],

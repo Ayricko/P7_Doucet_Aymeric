@@ -36,11 +36,20 @@ export default {
     send() {
       const token = localStorage.getItem('acces_token');
       const newPost = { title: this.title, content: this.content };
-      axios.post('http://localhost:3000/api/posts/new', newPost, { headers: { 'Content-Type': 'application/json', Authorization: token } }).then((response) => {
-        const data = response.data;
-        console.log(data.status);
-        this.$router.push('/news');
-      });
+      if (token) {
+        axios
+          .post('http://localhost:3000/api/posts/new', newPost, { headers: { 'Content-Type': 'application/json', Authorization: token } })
+          .then((response) => {
+            console.log(response);
+            window.location.reload();
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      } else {
+        alert('Session terminée veuillez vous reconnecter');
+        this.$router.push('/');
+      }
       (this.title = ''), (this.content = ''), (this.showNewPostBloc = false);
     },
     reset() {

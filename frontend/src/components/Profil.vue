@@ -30,8 +30,8 @@
         <v-btn color="#B2DFDB" @click="send">
           Enregister
         </v-btn>
-        <v-btn color="#B2DFDB" @click="reset">
-          Annuler
+        <v-btn color="#B2DFDB" @click="deleteAccount">
+          Supprimer mon compte
         </v-btn>
       </div>
     </v-form>
@@ -54,21 +54,27 @@ export default {
       },
     };
   },
+
   created() {
     const token = localStorage.getItem('acces_token');
-    axios.get('http://localhost:3000/api/users/profile', { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `${token}` } }).then((response) => {
-      this.user = response.data.lastName + ' ' + response.data.firstName;
-    });
+    axios
+      .get('http://localhost:3000/api/users/profile', { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `${token}` } })
+      .then((response) => {
+        this.user = response.data.lastName + ' ' + response.data.firstName;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   },
+
   methods: {
     send() {
-      const router = this.$router;
       const token = localStorage.getItem('acces_token');
       const userUpdate = { firstName: this.firstName, lastName: this.lastName };
       axios
         .put('http://localhost:3000/api/users/profile', userUpdate, { headers: { 'Content-Type': 'application/json', Authorization: `${token}` } })
         .then((response) => {
-          router.push('/news');
+          this.$router.push('/news');
           alert('Mise à jour effectué');
           console.log(response.status);
         })
@@ -76,9 +82,21 @@ export default {
           console.log(err);
         });
     },
-    reset() {
-      (this.lastName = ''), (this.firstName = ''), (this.password = '');
-      console.log('Annulé');
+
+    deleteAccount() {
+      const token = localStorage.getItem('acces_token');
+      axios
+        .delete('http://localhost:3000/api/users/profile/', { headers: { 'Content-Type': 'application/json', Authorization: `${token}` } })
+        .then((response) => {
+          alert('Votre compte a bien été supprimé');
+          localStorage.removeItem('acces_token');
+          localStorage.removeItem('userId');
+          this.$router.push('/');
+          console.log(response);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
   },
 };

@@ -30,6 +30,7 @@ export default {
   methods: {
     logout() {
       localStorage.removeItem('acces_token');
+      localStorage.removeItem('userId');
     },
   },
 };

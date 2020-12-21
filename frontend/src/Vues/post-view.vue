@@ -1,15 +1,19 @@
 <template>
   <div>
     <Header />
-    <Post @updated="displayNewPost" />
+    <Post />
     <div v-for="post in posts" :key="post.postId">
       <v-card class="cardPost">
         <v-card class="titleCardPost" color="#B2DFDB">
-          <h3>{{ post.title }}</h3>
+          <div class="titleBloc">
+            <h3>{{ post.title }}</h3>
+            <v-icon class="deleteBtn" @click="deletePost(post.id)">mdi-delete</v-icon>
+          </div>
           <div class="signatureCardPost text--secondary">
             <div class="avatarBloc">
               <v-avatar color="#53AFA7">
-                <span class="white--text headline">AD</span>
+                <!-- <span class="white--text headline">AD</span> -->
+                <v-icon color="white">mdi-account</v-icon>
               </v-avatar>
               <div class="avatarSpace">{{ post.User.firstName }}</div>
             </div>
@@ -74,23 +78,36 @@ export default {
       comment: [],
     };
   },
-  created() {
-    axios.get('http://localhost:3000/api/posts').then((response) => {
-      this.posts = response.data;
-      console.log(this.posts);
-    });
+  mounted() {
+    axios
+      .get('http://localhost:3000/api/posts')
+      .then((response) => {
+        this.posts = response.data;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   },
 
   methods: {
     like() {
       console.log('liké');
     },
+    deletePost(postId) {
+      const token = localStorage.getItem('acces_token');
+      axios
+        .delete(`http://localhost:3000/api/posts/${postId}/`, { headers: { 'Content-Type': 'application/json', Authorization: token } })
+        .then((response) => {
+          console.log(response);
+          window.location.reload();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
     sendComment() {
       console.log(this.comment);
       this.comment = '';
-    },
-    displayNewPost(newPost) {
-      this.posts.push(newPost);
     },
   },
 };
@@ -103,6 +120,16 @@ export default {
 .cardPost {
   max-width: 700px;
   margin: 20px auto 10px auto;
+}
+.titleBloc {
+  display: flex;
+}
+.titleBloc h3 {
+  margin: auto;
+}
+.deleteBtn {
+  margin: auto 0 auto 0;
+  width: auto;
 }
 .titleCardPost {
   text-align: center;

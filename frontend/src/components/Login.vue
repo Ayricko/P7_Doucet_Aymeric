@@ -55,9 +55,9 @@
             <v-btn color="#B2DFDB" @click="register">
               Inscription
             </v-btn>
-            <v-btn color="#B2DFDB" @click="showLogin = !showLogin">
+            <!-- <v-btn color="#B2DFDB" @click="showLogin = !showLogin">
               Annuler
-            </v-btn>
+            </v-btn> -->
           </div>
         </div>
       </form>
@@ -85,15 +85,15 @@ export default {
   methods: {
     login() {
       const userLogin = { email: this.email, password: this.password };
-      const router = this.$router;
       axios
         .post('http://localhost:3000/api/users/login', userLogin)
         .then((response) => {
           if (response.status === 201) {
-            console.log(response.status);
             const token = response.data.token;
+            const userId = response.data.userId;
             localStorage.setItem('acces_token', token);
-            router.push('/news');
+            localStorage.setItem('userId', userId);
+            this.$router.push('/news');
           }
         })
         .catch((err) => {
@@ -107,8 +107,11 @@ export default {
         .post('http://localhost:3000/api/users/register', userRegister)
         .then((response) => {
           if (response.status === 201) {
-            console.log(response);
-            console.log(response.status);
+            const token = response.data.token;
+            const userId = response.data.userId;
+            localStorage.setItem('acces_token', token);
+            localStorage.setItem('userId', userId);
+            this.$router.push('/news');
           }
         })
         .catch((err) => {

@@ -8,15 +8,16 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      models.Post.hasMany(models.Comment);
       models.Post.belongsTo(models.User, {
         foreignKey: {
           allowNull: false,
+          onDelete: 'CASCADE',
         },
-        onDelete: 'CASCADE',
       });
+      models.Post.hasMany(models.Comment);
     }
   }
+
   Post.init(
     {
       title: DataTypes.STRING,
