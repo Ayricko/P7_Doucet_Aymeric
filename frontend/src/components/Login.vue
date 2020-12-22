@@ -82,17 +82,16 @@ export default {
       },
     };
   },
+
   methods: {
     login() {
       const userLogin = { email: this.email, password: this.password };
       axios
         .post('http://localhost:3000/api/users/login', userLogin)
         .then((response) => {
-          if (response.status === 201) {
+          if (response.status === 200) {
             const token = response.data.token;
-            const userId = response.data.userId;
             localStorage.setItem('acces_token', token);
-            localStorage.setItem('userId', userId);
             this.$router.push('/news');
           }
         })
@@ -101,6 +100,7 @@ export default {
           alert("Probleme d'authentification");
         });
     },
+
     register() {
       const userRegister = { email: this.email, firstName: this.firstName, lastName: this.lastName, password: this.password };
       axios
@@ -109,6 +109,8 @@ export default {
           if (response.status === 201) {
             const token = response.data.token;
             const userId = response.data.userId;
+            const admin = response.data.isAdmin;
+            localStorage.setItem('isAdmin', admin);
             localStorage.setItem('acces_token', token);
             localStorage.setItem('userId', userId);
             this.$router.push('/news');

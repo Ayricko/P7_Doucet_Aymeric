@@ -7,12 +7,11 @@
         <v-card class="titleCardPost" color="#B2DFDB">
           <div class="titleBloc">
             <h3>{{ post.title }}</h3>
-            <v-icon class="deleteBtn" @click="deletePost(post.id)">mdi-delete</v-icon>
+            <v-icon class="deleteBtn" v-if="post.UserId == userId || isAdmin == true" @click="deletePost(post.id)">mdi-delete</v-icon>
           </div>
           <div class="signatureCardPost text--secondary">
             <div class="avatarBloc">
               <v-avatar color="#53AFA7">
-                <!-- <span class="white--text headline">AD</span> -->
                 <v-icon color="white">mdi-account</v-icon>
               </v-avatar>
               <div class="avatarSpace">{{ post.User.firstName }}</div>
@@ -30,33 +29,33 @@
                 mdi-message-text
               </v-icon>
             </v-btn>
-            <v-btn color="#53AFA7" @click="like">
+            <v-btn color="#53AFA7" @click="report">
               <v-icon color="white">
-                mdi-heart
+                mdi-alert
               </v-icon>
               <div class="colorLike">{{ post.like }}</div>
             </v-btn>
           </div>
-          <div v-for="comment in post.comments" :key="comment.id">
-            <div v-show="commentBloc">
+          <div v-show="commentBloc">
+            <div class="commentFieldBloc">
+              <div class="commentField">
+                <v-text-field v-model="comment" label="Commentaire" placeholder="Commentaire"></v-text-field>
+              </div>
+              <div class="centrage">
+                <v-btn small color="#53AFA7" @click="sendComment(post.id)">
+                  <v-icon color="white">
+                    mdi-send
+                  </v-icon>
+                </v-btn>
+              </div>
+            </div>
+            <div v-for="comment in post.comments" :key="comment.id">
               <v-card class="commentBloc" color="#53AFA7">
                 <div class="text--secondary">{{ comment.user }} - {{ comment.date }}</div>
                 <div class="bodyComment">
                   {{ comment.body }}
                 </div>
               </v-card>
-            </div>
-          </div>
-          <div class="commentFieldBloc">
-            <div class="commentField">
-              <v-text-field v-model="comment" label="Commentaire" placeholder="Commentaire"></v-text-field>
-            </div>
-            <div class="centrage">
-              <v-btn small color="#53AFA7" @click="sendComment">
-                <v-icon color="white">
-                  mdi-send
-                </v-icon>
-              </v-btn>
             </div>
           </div>
         </v-card>
@@ -73,12 +72,25 @@ export default {
   components: { Post, Header },
   data() {
     return {
+      userId: null,
+      isAdmin: null,
       commentBloc: false,
       posts: [],
       comment: [],
     };
   },
   mounted() {
+    const token = localStorage.getItem('acces_token');
+    axios
+      .get('http://localhost:3000/api/users/profile', { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `${token}` } })
+      .then((response) => {
+        this.isAdmin = response.data.isAdmin;
+        this.userId = response.data.id;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
     axios
       .get('http://localhost:3000/api/posts')
       .then((response) => {
@@ -90,9 +102,10 @@ export default {
   },
 
   methods: {
-    like() {
-      console.log('liké');
+    report() {
+      alert('Ce Post va être vérifié par un administrateur. Merci de votre contribution.');
     },
+
     deletePost(postId) {
       const token = localStorage.getItem('acces_token');
       axios
@@ -105,8 +118,11 @@ export default {
           console.log(err);
         });
     },
-    sendComment() {
-      console.log(this.comment);
+
+    sendComment(postId) {
+      let userComment = this.comment;
+      console.log(userComment);
+      console.log(postId);
       this.comment = '';
     },
   },

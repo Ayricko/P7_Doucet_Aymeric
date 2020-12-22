@@ -123,9 +123,10 @@ module.exports = {
       ],
       (userFound) => {
         if (userFound) {
-          return res.status(201).json({
+          return res.status(200).json({
             userId: userFound.id,
             token: jwtUtils.generateTokenForUser(userFound),
+            isAdmin: userFound.isAdmin,
           });
         } else {
           return res.status(500).json({ error: 'cannot log on user' });
@@ -142,7 +143,7 @@ module.exports = {
     if (userId < 0) return res.status(400).json({ error: 'wrong token' });
 
     models.User.findOne({
-      attributes: ['id', 'email', 'firstName', 'lastName'],
+      attributes: ['id', 'email', 'firstName', 'lastName', 'isAdmin'],
       where: { id: userId },
     })
       .then((user) => {
