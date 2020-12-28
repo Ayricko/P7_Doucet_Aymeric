@@ -92,7 +92,7 @@ export default {
           if (response.status === 200) {
             const token = response.data.token;
             localStorage.setItem('acces_token', token);
-            this.$router.push('/news');
+            this.$router.push('/home');
           }
         })
         .catch((err) => {
@@ -108,12 +108,8 @@ export default {
         .then((response) => {
           if (response.status === 201) {
             const token = response.data.token;
-            const userId = response.data.userId;
-            const admin = response.data.isAdmin;
-            localStorage.setItem('isAdmin', admin);
             localStorage.setItem('acces_token', token);
-            localStorage.setItem('userId', userId);
-            this.$router.push('/news');
+            this.$router.push('/home');
           }
         })
         .catch((err) => {

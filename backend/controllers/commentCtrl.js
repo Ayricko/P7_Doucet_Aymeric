@@ -92,9 +92,51 @@ module.exports = {
     }
     models.Comment.findAll({
       order: [order != null ? order.split(':') : ['createdAt', 'DESC']],
-      attirbutes: fields !== '*' && fields != null ? fields.split(',') : null,
+      attributes: fields !== '*' && fields != null ? fields.split(',') : null,
       limit: !isNaN(limit) ? limit : null,
       offset: !isNaN(offset) ? offset : null,
+      include: [
+        {
+          model: models.User,
+          attributes: ['firstName', 'lastName'],
+        },
+      ],
+    })
+      .then((comments) => {
+        if (comments) {
+          res.status(200).json(comments);
+        } else {
+          res.status(404).json({ error: 'no comments found' });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ error: 'invalid fields' });
+      });
+  },
+
+  getPostComments: (req, res) => {
+    // Getting auth header
+    const headerAuth = req.headers['authorization'];
+    const userId = jwtUtils.getUserId(headerAuth);
+
+    const fields = req.query.fields;
+    const limit = parseInt(req.query.limit);
+    const offset = parseInt(req.query.offset);
+    const order = req.query.order;
+
+    // Params
+    const postId = parseInt(req.params.PostId);
+
+    if (limit > ITEMS_LIMIT) {
+      limit = ITEMS_LIMIT;
+    }
+    models.Comment.findAll({
+      order: [order != null ? order.split(':') : ['createdAt', 'DESC']],
+      attributes: fields !== '*' && fields != null ? fields.split(',') : null,
+      limit: !isNaN(limit) ? limit : null,
+      offset: !isNaN(offset) ? offset : null,
+      where: { postId: postId },
       include: [
         {
           model: models.User,
@@ -189,7 +231,7 @@ module.exports = {
       [
         (done) => {
           models.User.findOne({
-            attributes: ['id'],
+            attributes: ['id', 'isAdmin'],
             where: { id: userId },
           })
             .then((userFound) => {
@@ -212,7 +254,7 @@ module.exports = {
           }
         },
         (comment, userFound, done) => {
-          if (comment.UserId === userFound.id) {
+          if (comment.UserId === userFound.id || userFound.isAdmin === true) {
             comment.destroy(comment);
             res.status(200).json({ message: 'comment deleted' });
           } else {

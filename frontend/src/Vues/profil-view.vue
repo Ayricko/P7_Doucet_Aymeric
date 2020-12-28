@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="background">
     <Header />
     <Profil />
   </div>
@@ -22,4 +22,10 @@ export default {
   computed: {},
 };
 </script>
-<style></style>
+<style>
+.background {
+  width: 100%;
+  height: 100%;
+  background-color: #f1f4f0;
+}
+</style>

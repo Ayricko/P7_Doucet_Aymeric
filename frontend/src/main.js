@@ -12,7 +12,8 @@ Vue.config.productionTip = false;
 Vue.use(VueRouter);
 
 import AuthView from './Vues/auth-view.vue';
-import PostsView from './Vues/post-view.vue';
+import HomeView from './Vues/home-view.vue';
+import PostView from './Vues/post-view.vue';
 import ProfilView from './Vues/profil-view.vue';
 
 import App from './App.vue';
@@ -22,7 +23,8 @@ const router = new VueRouter({
   base: __dirname,
   routes: [
     { path: '/', component: AuthView },
-    { path: '/news', component: PostsView },
+    { path: '/home', component: HomeView },
+    { path: '/post/:id', component: PostView },
     { path: '/profil', component: ProfilView },
   ],
 });

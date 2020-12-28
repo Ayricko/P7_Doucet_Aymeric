@@ -18,12 +18,14 @@ exports.router = (() => {
   // Posts Routes
   apiRouter.route('/posts/new/').post(postsCtrl.createPost);
   apiRouter.route('/posts/').get(postsCtrl.getPosts);
+  apiRouter.route('/posts/:PostId/').get(postsCtrl.getOnePost);
   apiRouter.route('/posts/:PostId/').put(postsCtrl.updatePost);
   apiRouter.route('/posts/:PostId/').delete(postsCtrl.deletePost);
 
   // Comments Routes
   apiRouter.route('/comments/:PostId/new/').post(commentCtrl.createComment);
   apiRouter.route('/comments/').get(commentCtrl.getComments);
+  apiRouter.route('/comments/:PostId/').get(commentCtrl.getPostComments);
   apiRouter.route('/comments/:CommentId/').put(commentCtrl.updateComment);
   apiRouter.route('/comments/:CommentId/').delete(commentCtrl.deleteComment);
 

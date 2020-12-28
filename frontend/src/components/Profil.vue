@@ -1,19 +1,18 @@
 <template>
   <v-card class="profilCard">
-    <v-card color="#B2DFDB">
-      <div class="headerProfil">
-        <v-avatar color="#53AFA7">
-          <span class="white--text headline">AD</span>
-        </v-avatar>
-        <div class="centrage">
-          <h2>{{ user }}</h2>
-        </div>
+    <div class="headerProfil">
+      <v-avatar color="#53AFA7">
+        <v-icon color="white">mdi-account</v-icon>
+      </v-avatar>
+      <div class="centrage">
+        <h2>{{ user }}</h2>
       </div>
-    </v-card>
+    </div>
+    <hr />
     <v-form>
       <div class="inputForm">
-        <v-text-field v-model="lastName" label="Nom" placeholder="Nom" required></v-text-field>
-        <v-text-field v-model="firstName" label="Prénom" placeholder="Prénom" required></v-text-field>
+        <v-text-field v-model="lastName" placeholder="Nom" filled rounded dense>></v-text-field>
+        <v-text-field v-model="firstName" placeholder="Prénom" filled rounded dense>></v-text-field>
         <!-- <v-text-field
           v-model="password"
           :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
@@ -26,7 +25,7 @@
           @click:append="show1 = !show1"
         ></v-text-field> -->
       </div>
-      <div class="bouton">
+      <div class="btn">
         <v-btn color="#B2DFDB" @click="send">
           Enregister
         </v-btn>
@@ -74,7 +73,7 @@ export default {
       axios
         .put('http://localhost:3000/api/users/profile', userUpdate, { headers: { 'Content-Type': 'application/json', Authorization: `${token}` } })
         .then((response) => {
-          this.$router.push('/news');
+          this.$router.push('/home');
           alert('Mise à jour effectué');
           console.log(response.status);
         })
@@ -105,13 +104,14 @@ export default {
 .profilCard {
   max-width: 700px;
   margin: 50px auto 0 auto;
+  padding: 20px 20px 30px 20px;
 }
 .headerProfil {
   display: flex;
   justify-content: space-around;
-  padding: 20px 0;
+  padding: 0 0 20px 0;
 }
-.bouton {
+.btn {
   display: flex;
   justify-content: space-around;
 }
@@ -119,7 +119,7 @@ export default {
   margin: auto 0 auto 0;
 }
 .inputForm {
-  padding: 30px 30px 15px 30px;
+  padding: 30px 0 20px 0;
 }
 @media screen and (max-width: 640px) {
   .profilCard {

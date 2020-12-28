@@ -96,6 +96,30 @@ module.exports = {
         res.status(500).json({ error: 'invalid fields' });
       });
   },
+  getOnePost: (req, res) => {
+    // Params
+    const postId = parseInt(req.params.PostId);
+    models.Post.findOne({
+      include: [
+        {
+          model: models.User,
+          attributes: ['firstName', 'lastName'],
+        },
+      ],
+      where: { id: postId },
+    })
+      .then((post) => {
+        if (post) {
+          res.status(200).json(post);
+        } else {
+          res.status(404).json({ error: 'no posts found' });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ error: 'invalid fields' });
+      });
+  },
   updatePost: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
@@ -172,7 +196,7 @@ module.exports = {
       [
         (done) => {
           models.User.findOne({
-            attributes: ['id'],
+            attributes: ['id', 'isAdmin'],
             where: { id: userId },
           })
             .then((userFound) => {
@@ -193,13 +217,14 @@ module.exports = {
           } else {
             res.status(404).json({ error: 'user not found' });
           }
-        }, // recupère les commentaire lié au post, supprimer les commentaire, et ensuite supprimer
+        },
         (post, userFound, done) => {
-          if (post.UserId === userFound.id) {
+          if (post.UserId === userFound.id || userFound.isAdmin === true) {
             post.destroy(post);
             res.status(200).json({ message: 'Post deleted' });
           } else {
             res.status(404).json({ error: 'This user is not allowed to delete this post' });
+            console.log(userFound);
           }
         },
       ],

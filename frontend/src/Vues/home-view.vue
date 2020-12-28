@@ -1,19 +1,18 @@
 <template>
   <div class="background">
     <Header />
-    <OnePostView />
+    <NewPost />
+    <PostsView />
   </div>
 </template>
+
 <script>
 import Header from '../components/Header';
-import OnePostView from '../components/OnePostView';
+import NewPost from '../components/NewPost';
+import PostsView from '../components/PostsView';
 export default {
-  components: {
-    Header,
-    OnePostView,
-  },
-  name: 'PostView',
-  data: () => {
+  components: { NewPost, Header, PostsView },
+  data() {
     return {};
   },
 };
