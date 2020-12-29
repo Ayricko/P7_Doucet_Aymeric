@@ -9,24 +9,28 @@
       </div>
     </div>
     <hr />
-    <v-form>
+    <v-form ref="form" v-model="valid">
       <div class="inputForm">
-        <v-text-field v-model="lastName" placeholder="Nom" filled rounded dense>></v-text-field>
-        <v-text-field v-model="firstName" placeholder="Prénom" filled rounded dense>></v-text-field>
-        <!-- <v-text-field
+        <v-text-field v-model="lastName" placeholder="Nom" filled rounded dense></v-text-field>
+        <v-text-field v-model="firstName" placeholder="Prénom" filled rounded dense></v-text-field>
+        <v-text-field
           v-model="password"
           :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
           :rules="[rules.required, rules.min]"
           :type="show1 ? 'text' : 'password'"
           name="input-10-1"
-          label="Mot de passe"
           placeholder="Mot de passe"
           hint="Minimum 8 caractères"
           @click:append="show1 = !show1"
-        ></v-text-field> -->
+          required
+          filled
+          rounded
+          dense
+        >
+        </v-text-field>
       </div>
       <div class="btn">
-        <v-btn color="#B2DFDB" @click="send">
+        <v-btn color="#B2DFDB" @click="validate">
           Enregister
         </v-btn>
         <v-btn color="#B2DFDB" @click="deleteAccount">
@@ -51,10 +55,11 @@ export default {
         required: (value) => !!value || 'Required.',
         min: (v) => v.length >= 8 || 'Minimum 8 caractères',
       },
+      valid: true,
     };
   },
 
-  created() {
+  mounted() {
     const token = localStorage.getItem('acces_token');
     axios
       .get('http://localhost:3000/api/users/profile', { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `${token}` } })
@@ -67,21 +72,22 @@ export default {
   },
 
   methods: {
-    send() {
-      const token = localStorage.getItem('acces_token');
-      const userUpdate = { firstName: this.firstName, lastName: this.lastName };
-      axios
-        .put('http://localhost:3000/api/users/profile', userUpdate, { headers: { 'Content-Type': 'application/json', Authorization: `${token}` } })
-        .then((response) => {
-          this.$router.push('/home');
-          alert('Mise à jour effectué');
-          console.log(response.status);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+    validate() {
+      if (this.$refs.form.validate()) {
+        const token = localStorage.getItem('acces_token');
+        const userUpdate = { firstName: this.firstName, lastName: this.lastName, password: this.password };
+        axios
+          .put('http://localhost:3000/api/users/profile', userUpdate, { headers: { 'Content-Type': 'application/json', Authorization: `${token}` } })
+          .then((response) => {
+            this.$router.push('/home');
+            alert('Mise à jour effectué');
+            console.log(response.status);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
     },
-
     deleteAccount() {
       const token = localStorage.getItem('acces_token');
       axios

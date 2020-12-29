@@ -21,6 +21,7 @@ exports.router = (() => {
   apiRouter.route('/posts/:PostId/').get(postsCtrl.getOnePost);
   apiRouter.route('/posts/:PostId/').put(postsCtrl.updatePost);
   apiRouter.route('/posts/:PostId/').delete(postsCtrl.deletePost);
+  apiRouter.route('/posts/:PostId/signale/').put(postsCtrl.signalePost);
 
   // Comments Routes
   apiRouter.route('/comments/:PostId/new/').post(commentCtrl.createComment);
@@ -28,6 +29,7 @@ exports.router = (() => {
   apiRouter.route('/comments/:PostId/').get(commentCtrl.getPostComments);
   apiRouter.route('/comments/:CommentId/').put(commentCtrl.updateComment);
   apiRouter.route('/comments/:CommentId/').delete(commentCtrl.deleteComment);
+  apiRouter.route('/comments/:CommentId/signale/').put(commentCtrl.signaleComment);
 
   return apiRouter;
 })();

@@ -58,6 +58,7 @@ module.exports = {
           if (postFound && userFound) {
             models.Comment.create({
               content: content,
+              signale: 0,
               UserId: userFound.id,
               PostId: postFound.id,
             })
@@ -267,6 +268,45 @@ module.exports = {
           return res.status(201).json(comment);
         } else {
           return res.status(500).json({ error: 'cannot delete comment' });
+        }
+      }
+    );
+  },
+  signaleComment: (req, res) => {
+    // Params
+    const signale = true;
+    const commentId = parseInt(req.params.CommentId);
+
+    asyncLib.waterfall(
+      [
+        (done) => {
+          models.Comment.findOne({
+            attributes: ['id', 'signale'],
+            where: { id: commentId },
+          })
+            .then((comment) => {
+              done(null, comment);
+            })
+            .catch((err) => res.status(500).json({ error: 'unable to find comment' }));
+        },
+        (comment, done) => {
+          comment
+            .update({
+              signale: signale ? signale : comment.signale,
+            })
+            .then(() => {
+              done(comment);
+            })
+            .catch((err) => {
+              res.status(500).json({ error: 'cannot signal comment' });
+            });
+        },
+      ],
+      (comment) => {
+        if (comment) {
+          return res.status(201).json(comment);
+        } else {
+          return res.status(500).json({ error: 'cannot signal comment' });
         }
       }
     );

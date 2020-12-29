@@ -166,6 +166,7 @@ module.exports = {
     // Params
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
+    const password = req.body.password;
 
     asyncLib.waterfall(
       [
@@ -181,10 +182,20 @@ module.exports = {
         },
         (userFound, done) => {
           if (userFound) {
+            bcrypt.hash(password, 5, (err, bcryptedPassword) => {
+              done(null, userFound, bcryptedPassword);
+            });
+          } else {
+            return res.status(409).json({ error: 'user already exist' });
+          }
+        },
+        (userFound, bcryptedPassword, done) => {
+          if (userFound) {
             userFound
               .update({
                 firstName: firstName ? firstName : userFound.firstName,
                 lastName: lastName ? lastName : userFound.lastName,
+                password: bcryptedPassword,
               })
               .then(() => {
                 done(userFound);

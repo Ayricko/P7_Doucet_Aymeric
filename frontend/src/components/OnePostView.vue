@@ -1,5 +1,6 @@
 <template>
   <div>
+    <UpdatePost />
     <v-card class="Card">
       <div class="PostHeader">
         <div class="PostAvatar">
@@ -93,8 +94,10 @@
 
 <script>
 import axios from 'axios';
+import UpdatePost from './UpdatePost';
 export default {
-  name: 'OnePost',
+  name: 'OnePostView',
+  component: { UpdatePost },
   data() {
     return {
       userId: null,
@@ -110,7 +113,7 @@ export default {
   mounted() {
     const token = localStorage.getItem('acces_token');
     const postId = this.$route.params.id;
-
+    // Get User Profile
     axios
       .get('http://localhost:3000/api/users/profile', { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `${token}` } })
       .then((response) => {
@@ -120,7 +123,7 @@ export default {
       .catch((err) => {
         console.log(err);
       });
-
+    // Get One Post
     axios
       .get(`http://localhost:3000/api/posts/${postId}`)
       .then((response) => {
@@ -130,7 +133,7 @@ export default {
       .catch((err) => {
         console.log(err);
       });
-
+    // Get comments of this Post
     axios
       .get(`http://localhost:3000/api/comments/${postId}/`)
       .then((response) => {

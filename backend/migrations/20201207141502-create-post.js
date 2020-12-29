@@ -24,8 +24,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING,
       },
-      likes: {
-        type: Sequelize.INTEGER,
+      signale: {
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
       },
       createdAt: {
         allowNull: false,

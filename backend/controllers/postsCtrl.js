@@ -43,7 +43,7 @@ module.exports = {
             models.Post.create({
               title: title,
               content: content,
-              likes: 0,
+              signale: 0,
               UserId: userFound.id,
             }).then((newPost) => {
               done(newPost);
@@ -233,6 +233,45 @@ module.exports = {
           return res.status(201).json(post);
         } else {
           return res.status(500).json({ error: 'cannot delete post' });
+        }
+      }
+    );
+  },
+  signalePost: (req, res) => {
+    // Params
+    const signale = true;
+    const postId = parseInt(req.params.PostId);
+
+    asyncLib.waterfall(
+      [
+        (done) => {
+          models.Post.findOne({
+            attributes: ['id', 'signale'],
+            where: { id: postId },
+          })
+            .then((post) => {
+              done(null, post);
+            })
+            .catch((err) => res.status(500).json({ error: 'unable to find post' }));
+        },
+        (post, done) => {
+          post
+            .update({
+              signale: signale ? signale : post.signale,
+            })
+            .then(() => {
+              done(post);
+            })
+            .catch((err) => {
+              res.status(500).json({ error: 'cannot signal post' });
+            });
+        },
+      ],
+      (post) => {
+        if (post) {
+          return res.status(201).json(post);
+        } else {
+          return res.status(500).json({ error: 'cannot signal post' });
         }
       }
     );
