@@ -29,7 +29,7 @@
                 <v-icon class="iconMenu">mdi-pencil</v-icon>
                 Modifier
               </div>
-              <div v-if="post.UserId !== userId" class="itemMenu" @click="report">
+              <div v-if="post.UserId !== userId" class="itemMenu" @click="signalePost(post.id)">
                 <v-icon class="iconMenu">mdi-alert-circle-outline</v-icon>
                 Signaler
               </div>
@@ -38,17 +38,33 @@
         </div>
         <h3 class="PostTitle">{{ post.title }}</h3>
         <div class="PostContent">{{ post.content }}</div>
+        <div class="PostComment text--secondary">4 commentaires</div>
         <div>
           <hr />
           <div class="Icon">
-            <router-link :to="`/post/${post.id}`">
-              <v-icon large color="#53AFA7">
-                mdi-chat-outline
+            <div @click="alert = true" v-if="!alert">
+              <v-icon color="#53AFA7">
+                mdi-thumb-up-outline
               </v-icon>
-            </router-link>
-            <v-icon large color="#53AFA7" @click="report">
-              mdi-alert-circle-outline
-            </v-icon>
+              Liker
+            </div>
+            <v-alert v-model="alert" close-text="Close Alert" border="top" dark dismissible>
+              Nos equipes travaillent encore sur cette fonctionnalitée
+            </v-alert>
+            <div>
+              <router-link :to="`/post/${post.id}`">
+                <v-icon color="#53AFA7">
+                  mdi-comment-outline
+                </v-icon>
+                Commenter
+              </router-link>
+            </div>
+            <div>
+              <v-icon color="#53AFA7">
+                mdi-share-outline
+              </v-icon>
+              Partager
+            </div>
           </div>
         </div>
       </v-card>
@@ -62,6 +78,7 @@ export default {
   name: 'PostsView',
   data() {
     return {
+      alert: false,
       userId: null,
       isAdmin: null,
       commentBloc: false,
@@ -81,7 +98,6 @@ export default {
       .catch((err) => {
         console.log(err);
       });
-
     axios
       .get('http://localhost:3000/api/posts')
       .then((response) => {
@@ -90,7 +106,6 @@ export default {
       .catch((err) => {
         console.log(err);
       });
-    axios;
   },
 
   methods: {
@@ -125,8 +140,17 @@ export default {
         });
     },
 
-    report() {
-      alert('Ce Post va être vérifié par un administrateur. Merci de votre contribution.');
+    signalePost(postId) {
+      axios
+        .put(`http://localhost:3000/api/posts/${postId}/signale/`)
+        .then((response) => {
+          console.log(response);
+          alert('Ce Post va être vérifié par un administrateur. Merci de votre contribution.');
+          window.location.reload();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
   },
 };
@@ -134,6 +158,9 @@ export default {
 <style>
 .v-sheet.v-card {
   border-radius: 8px;
+}
+.v-application a {
+  color: #4b4949;
 }
 .Card {
   max-width: 700px;
@@ -159,11 +186,17 @@ export default {
 .PostContent {
   padding: 15px 30px 20px 30px;
 }
+.PostComment {
+  padding: 0 20px 5px 0;
+  text-align: right;
+  color: black;
+}
 .Icon {
   display: flex;
   justify-content: space-around;
   padding: 15px 0 0 0;
 }
+
 .CommentBloc {
   margin: 10px 0 0 0;
   padding: 10px;

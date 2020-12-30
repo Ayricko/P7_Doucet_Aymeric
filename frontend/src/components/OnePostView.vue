@@ -30,7 +30,7 @@
                 <v-icon class="iconMenu">mdi-pencil</v-icon>
                 Modifier
               </div>
-              <div v-if="post.UserId !== userId" class="itemMenu" @click="report">
+              <div v-if="post.UserId !== userId" class="itemMenu" @click="signalePost(post.id)">
                 <v-icon class="iconMenu">mdi-alert-circle-outline</v-icon>
                 Signaler
               </div>
@@ -75,7 +75,7 @@
                     <v-icon class="iconMenu">mdi-pencil</v-icon>
                     Modifier
                   </div>
-                  <div v-if="comment.UserId !== userId" class="itemMenu" @click="report">
+                  <div v-if="comment.UserId !== userId" class="itemMenu" @click="signaleComment(comment.id)">
                     <v-icon class="iconMenu">mdi-alert-circle-outline</v-icon>
                     Signaler
                   </div>
@@ -94,7 +94,7 @@
 
 <script>
 import axios from 'axios';
-import UpdatePost from './UpdatePost';
+import UpdatePost from './UpdatePost.vue';
 export default {
   name: 'OnePostView',
   component: { UpdatePost },
@@ -143,7 +143,6 @@ export default {
         console.log(err);
       });
   },
-
   methods: {
     deletePost(postId) {
       const token = localStorage.getItem('acces_token');
@@ -198,8 +197,29 @@ export default {
         });
     },
 
-    report() {
-      alert('Ce Post va être vérifié par un administrateur. Merci de votre contribution.');
+    signalePost(postId) {
+      axios
+        .put(`http://localhost:3000/api/posts/${postId}/signale/`)
+        .then((response) => {
+          console.log(response);
+          alert('Ce Post va être vérifié par un administrateur. Merci de votre contribution.');
+          window.location.reload();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    signaleComment(commentId) {
+      axios
+        .put(`http://localhost:3000/api/comments/${commentId}/signale/`)
+        .then((response) => {
+          console.log(response);
+          alert('Ce commentaire va être vérifié par un administrateur. Merci de votre contribution.');
+          window.location.reload();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
   },
 };
