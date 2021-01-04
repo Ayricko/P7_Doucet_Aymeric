@@ -16,13 +16,6 @@ export default {
     Login,
   },
   name: 'AuthView',
-  props: [],
-  mounted() {},
-  data: () => {
-    return {};
-  },
-  methods: {},
-  computed: {},
 };
 </script>
 <style>

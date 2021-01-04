@@ -44,6 +44,7 @@
 <script>
 import axios from 'axios';
 export default {
+  name: 'Profil',
   data() {
     return {
       user: '',

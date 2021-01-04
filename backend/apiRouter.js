@@ -22,14 +22,15 @@ exports.router = (() => {
   apiRouter.route('/posts/:PostId/').put(postsCtrl.updatePost);
   apiRouter.route('/posts/:PostId/').delete(postsCtrl.deletePost);
   apiRouter.route('/posts/:PostId/signale/').put(postsCtrl.signalePost);
+  apiRouter.route('/posts/:PostId/deleteSignale/').put(postsCtrl.deleteSignalePost);
 
   // Comments Routes
   apiRouter.route('/comments/:PostId/new/').post(commentCtrl.createComment);
   apiRouter.route('/comments/').get(commentCtrl.getComments);
-  apiRouter.route('/comments/:PostId/').get(commentCtrl.getPostComments);
   apiRouter.route('/comments/:CommentId/').put(commentCtrl.updateComment);
   apiRouter.route('/comments/:CommentId/').delete(commentCtrl.deleteComment);
   apiRouter.route('/comments/:CommentId/signale/').put(commentCtrl.signaleComment);
+  apiRouter.route('/comments/:CommentId/deleteSignale/').put(commentCtrl.deleteSignaleComment);
 
   return apiRouter;
 })();

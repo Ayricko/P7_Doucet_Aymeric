@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <v-card class="authCard" v-if="showLogin">
+  <div class="authCard">
+    <v-card v-if="showLogin">
       <v-toolbar color="#B2DFDB">
         <h3>Connectez-vous</h3>
       </v-toolbar>
@@ -55,9 +55,11 @@
             <v-btn color="#B2DFDB" @click="register">
               Inscription
             </v-btn>
-            <!-- <v-btn color="#B2DFDB" @click="showLogin = !showLogin">
-              Annuler
-            </v-btn> -->
+          </div>
+          <div class="bouton">
+            <div class="register" @click="showLogin = !showLogin">
+              J'ai déjà un compte!
+            </div>
           </div>
         </div>
       </form>
@@ -139,6 +141,7 @@ export default {
 .registerButton {
   display: flex;
   justify-content: space-around;
+  padding: 0 0 30px 0;
 }
 a {
   text-decoration: none;

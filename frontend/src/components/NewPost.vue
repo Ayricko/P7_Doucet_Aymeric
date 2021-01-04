@@ -7,7 +7,7 @@
         </v-avatar>
       </div>
       <div class="PublicationCardBtn">
-        <v-btn class="Btn" large depressed plain rounded @click="dialog = true">Que voulez-vous dire?</v-btn>
+        <v-btn class="Btn" large depressed plain rounded @click="dialog = true">Que voulez-vous dire, {{ firstName }} ?</v-btn>
       </div>
     </v-card>
     <v-dialog v-model="dialog" max-width="700">
@@ -17,8 +17,8 @@
         </div>
         <h2 class="CardNewPostTitle">Créer une publication</h2>
         <form class="InputBloc">
-          <v-text-field v-model="title" label="Titre" required filled rounded dense></v-text-field>
-          <v-text-field v-model="content" label="Que voulez-vous dire?" required filled rounded dense></v-text-field>
+          <v-textarea v-model="title" label="Titre" rows="1" auto-grow>></v-textarea>
+          <v-textarea v-model="content" label="Que voulez-vous dire?" rows="1" auto-grow>></v-textarea>
           <div class="CardNewPostBouton">
             <v-btn color="#B2DFDB" @click="send">
               Publier
@@ -37,9 +37,21 @@ export default {
     return {
       title: '',
       content: '',
+      firstName: '',
       showNewPostBloc: false,
       dialog: false,
     };
+  },
+  mounted() {
+    const token = localStorage.getItem('acces_token');
+    axios
+      .get('http://localhost:3000/api/users/profile', { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `${token}` } })
+      .then((response) => {
+        this.firstName = response.data.firstName;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   },
   methods: {
     send() {

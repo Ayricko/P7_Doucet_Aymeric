@@ -74,13 +74,24 @@ module.exports = {
 
     models.Post.findAll({
       order: [order != null ? order.split(':') : ['createdAt', 'DESC']],
-      attirbutes: fields !== '*' && fields != null ? fields.split(',') : null,
+      attributes: fields !== '*' && fields != null ? fields.split(',') : null,
       limit: !isNaN(limit) ? limit : null,
       offset: !isNaN(offset) ? offset : null,
       include: [
         {
           model: models.User,
           attributes: ['firstName', 'lastName'],
+        },
+        {
+          model: models.Comment,
+          order: ['createdAt', 'DESC'],
+          attributes: ['id', 'content', 'userId', 'createdAt', 'signale'],
+          include: [
+            {
+              model: models.User,
+              attributes: ['firstName'],
+            },
+          ],
         },
       ],
     })
@@ -104,6 +115,10 @@ module.exports = {
         {
           model: models.User,
           attributes: ['firstName', 'lastName'],
+        },
+        {
+          model: models.Comment,
+          attributes: ['id', 'content', 'userId'],
         },
       ],
       where: { id: postId },
@@ -134,7 +149,7 @@ module.exports = {
       [
         (done) => {
           models.User.findOne({
-            attributes: ['id', 'firstName', 'lastName'],
+            attributes: ['id', 'isAdmin'],
             where: { id: userId },
           })
             .then((userFound) => {
@@ -157,7 +172,7 @@ module.exports = {
           }
         },
         (post, userFound, done) => {
-          if (post.UserId === userFound.id) {
+          if (post.UserId === userFound.id || userFound.isAdmin === true) {
             post
               .update({
                 title: title ? title : post.title,
@@ -167,10 +182,10 @@ module.exports = {
                 done(post);
               })
               .catch((err) => {
-                res.status(500).json({ error: 'cannot update post' });
+                res.status(500).json({ message: 'cannot update this post' });
               });
           } else {
-            res.status(404).json({ error: 'This user is not allowed to update this post' });
+            res.status(404).json({ message: 'This user is not allowed to update this fucking post' });
           }
         },
       ],
@@ -239,7 +254,48 @@ module.exports = {
   },
   signalePost: (req, res) => {
     // Params
-    const signale = true;
+    const signale = 1;
+    const postId = parseInt(req.params.PostId);
+
+    asyncLib.waterfall(
+      [
+        (done) => {
+          models.Post.findOne({
+            attributes: ['id', 'signale'],
+            where: { id: postId },
+          })
+            .then((post) => {
+              done(null, post);
+              console.log(post);
+            })
+            .catch((err) => res.status(500).json({ error: 'unable to find post' }));
+        },
+        (post, done) => {
+          post
+            .update({
+              signale: signale ? signale : post.signale,
+            })
+            .then(() => {
+              console.log(post);
+              done(post);
+            })
+            .catch((err) => {
+              res.status(500).json({ error: 'cannot signal post' });
+            });
+        },
+      ],
+      (post) => {
+        if (post) {
+          return res.status(201).json(post);
+        } else {
+          return res.status(500).json({ error: 'cannot signal post' });
+        }
+      }
+    );
+  },
+  deleteSignalePost: (req, res) => {
+    // Params
+    const signale = -1;
     const postId = parseInt(req.params.PostId);
 
     asyncLib.waterfall(
@@ -260,10 +316,11 @@ module.exports = {
               signale: signale ? signale : post.signale,
             })
             .then(() => {
+              console.log(post);
               done(post);
             })
             .catch((err) => {
-              res.status(500).json({ error: 'cannot signal post' });
+              res.status(500).json({ error: 'cannot delete signal post' });
             });
         },
       ],
@@ -271,7 +328,7 @@ module.exports = {
         if (post) {
           return res.status(201).json(post);
         } else {
-          return res.status(500).json({ error: 'cannot signal post' });
+          return res.status(500).json({ error: 'cannot  delete signal post' });
         }
       }
     );

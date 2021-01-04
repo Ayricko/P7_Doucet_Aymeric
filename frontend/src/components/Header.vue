@@ -6,7 +6,15 @@
         <span class="iconS logo"><img class="ajust" src="../assets/logoSeul.png"/></span>
       </router-link>
     </div>
+
     <div class="itemNav">
+      <div v-if="isAdmin == true">
+        <router-link to="/moderate">
+          <v-icon class="moderateIcon" color="black" x-large>
+            mdi-police-badge-outline
+          </v-icon>
+        </router-link>
+      </div>
       <router-link to="/profil">
         <v-avatar color="#53AFA7">
           <v-icon color="white">mdi-account</v-icon>
@@ -30,6 +38,7 @@ export default {
   data() {
     return {
       firstName: '',
+      isAdmin: '',
     };
   },
   created() {
@@ -38,6 +47,7 @@ export default {
       .get('http://localhost:3000/api/users/profile', { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `${token}` } })
       .then((response) => {
         this.firstName = response.data.firstName;
+        this.isAdmin = response.data.isAdmin;
       })
       .catch((err) => {
         console.log(err);
@@ -68,6 +78,9 @@ export default {
 .itemNav {
   display: flex;
   align-items: center;
+}
+.moderateIcon {
+  padding: 5px 10px 0 0;
 }
 .ajust {
   padding: 7px 0 0 0;
