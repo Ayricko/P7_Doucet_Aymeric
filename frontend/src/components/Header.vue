@@ -19,8 +19,8 @@
         <v-avatar color="#53AFA7">
           <v-icon color="white">mdi-account</v-icon>
         </v-avatar>
+        <span class="profilNav">{{ firstName }}</span>
       </router-link>
-      <span class="profilNav">{{ firstName }}</span>
       <router-link to="/">
         <span @click="logout">
           <v-icon color="red">

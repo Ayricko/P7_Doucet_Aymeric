@@ -260,7 +260,7 @@ export default {
 
     sendComment(postId) {
       const token = localStorage.getItem('acces_token');
-      const newComment = { content: this.content };
+      const newComment = { content: this.commentContent };
       axios
         .post(`http://localhost:3000/api/comments/${postId}/new/`, newComment, { headers: { 'Content-Type': 'application/json', Authorization: token } })
         .then((response) => {
