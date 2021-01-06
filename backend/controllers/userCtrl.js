@@ -1,6 +1,6 @@
 // Imports
 const bcrypt = require('bcrypt');
-const jwtUtils = require('../utils/jwt.utils');
+const jwt = require('../middleware/auth');
 const models = require('../models');
 const asyncLib = require('async');
 
@@ -75,7 +75,7 @@ module.exports = {
         if (newUser) {
           return res.status(201).json({
             userId: newUser.id,
-            token: jwtUtils.generateTokenForUser(newUser),
+            token: jwt.generateTokenForUser(newUser),
           });
         } else {
           return res.status(500).json({ error: 'cannot add user' });
@@ -125,7 +125,7 @@ module.exports = {
         if (userFound) {
           return res.status(200).json({
             userId: userFound.id,
-            token: jwtUtils.generateTokenForUser(userFound),
+            token: jwt.generateTokenForUser(userFound),
             isAdmin: userFound.isAdmin,
           });
         } else {
@@ -138,7 +138,7 @@ module.exports = {
   getUserProfile: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
-    const userId = jwtUtils.getUserId(headerAuth);
+    const userId = jwt.getUserId(headerAuth);
 
     if (userId < 0) return res.status(400).json({ error: 'wrong token' });
 
@@ -161,7 +161,7 @@ module.exports = {
   updateUserProfile: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
-    const userId = jwtUtils.getUserId(headerAuth);
+    const userId = jwt.getUserId(headerAuth);
 
     // Params
     const firstName = req.body.firstName;
@@ -221,7 +221,7 @@ module.exports = {
   deleteUserProfile: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
-    const userId = jwtUtils.getUserId(headerAuth);
+    const userId = jwt.getUserId(headerAuth);
 
     if (userId < 0) return res.status(400).json({ error: 'wrong token' });
 

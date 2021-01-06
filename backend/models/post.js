@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       title: { type: DataTypes.STRING, allowNull: false },
       content: { type: DataTypes.STRING, allowNull: false },
       signale: { type: DataTypes.BOOLEAN, allowNull: false, default: false },
+      imageUrl: { type: DataTypes.STRING, allowNull: true },
     },
     {
       sequelize,

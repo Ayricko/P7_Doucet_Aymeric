@@ -1,7 +1,7 @@
 // Imports
 const models = require('../models');
 const asyncLib = require('async');
-const jwtUtils = require('../utils/jwt.utils');
+const jwt = require('../middleware/auth');
 
 // Constants
 const TITLE_LIMIT = 2;
@@ -13,7 +13,7 @@ module.exports = {
   createPost: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
-    const userId = jwtUtils.getUserId(headerAuth);
+    const userId = jwt.getUserId(headerAuth);
 
     // Params
     const title = req.body.title;
@@ -138,7 +138,7 @@ module.exports = {
   updatePost: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
-    const userId = jwtUtils.getUserId(headerAuth);
+    const userId = jwt.getUserId(headerAuth);
 
     // Params
     const content = req.body.content;
@@ -202,7 +202,7 @@ module.exports = {
   deletePost: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
-    const userId = jwtUtils.getUserId(headerAuth);
+    const userId = jwt.getUserId(headerAuth);
 
     // Params
     const postId = parseInt(req.params.PostId);
