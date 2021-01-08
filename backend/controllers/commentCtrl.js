@@ -1,7 +1,7 @@
 // Imports
 const models = require('../models');
 const asyncLib = require('async');
-const jwt = require('../middleware/auth');
+const jowt = require('../middleware/auth');
 
 // Constants
 const CONTENT_LIMIT = 3;
@@ -12,7 +12,7 @@ module.exports = {
   createComment: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
-    const userId = jwt.getUserId(headerAuth);
+    const userId = jowt.getUserId(headerAuth);
 
     // Params
     const content = req.body.content;
@@ -119,7 +119,7 @@ module.exports = {
   updateComment: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
-    const userId = jwt.getUserId(headerAuth);
+    const userId = jowt.getUserId(headerAuth);
 
     // Params
     const content = req.body.content;
@@ -181,7 +181,7 @@ module.exports = {
   deleteComment: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
-    const userId = jwt.getUserId(headerAuth);
+    const userId = jowt.getUserId(headerAuth);
 
     // Params
     const commentId = parseInt(req.params.CommentId);

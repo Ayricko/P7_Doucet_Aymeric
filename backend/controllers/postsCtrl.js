@@ -1,7 +1,7 @@
 // Imports
 const models = require('../models');
 const asyncLib = require('async');
-const jwt = require('../middleware/auth');
+const jowt = require('../middleware/auth');
 
 // Constants
 const TITLE_LIMIT = 2;
@@ -13,11 +13,12 @@ module.exports = {
   createPost: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
-    const userId = jwt.getUserId(headerAuth);
+    const userId = jowt.getUserId(headerAuth);
 
     // Params
     const title = req.body.title;
     const content = req.body.content;
+    const imageUrl = req.body.imageUrl;
 
     if (title == null || content == null) {
       return res.status(400).json({ error: 'missing parameters' });
@@ -45,6 +46,7 @@ module.exports = {
               content: content,
               signale: 0,
               UserId: userFound.id,
+              imageUrl: imageUrl,
             }).then((newPost) => {
               done(newPost);
             });
@@ -138,7 +140,7 @@ module.exports = {
   updatePost: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
-    const userId = jwt.getUserId(headerAuth);
+    const userId = jowt.getUserId(headerAuth);
 
     // Params
     const content = req.body.content;
@@ -202,7 +204,7 @@ module.exports = {
   deletePost: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
-    const userId = jwt.getUserId(headerAuth);
+    const userId = jowt.getUserId(headerAuth);
 
     // Params
     const postId = parseInt(req.params.PostId);

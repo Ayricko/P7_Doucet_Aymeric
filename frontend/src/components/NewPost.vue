@@ -17,8 +17,16 @@
         </div>
         <h2 class="CardNewPostTitle">Créer une publication</h2>
         <form class="InputBloc">
-          <v-textarea v-model="title" label="Titre" rows="1" auto-grow>></v-textarea>
-          <v-textarea v-model="content" label="Que voulez-vous dire?" rows="1" auto-grow>></v-textarea>
+          <v-textarea v-model="title" label="Titre" rows="1" auto-grow></v-textarea>
+          <v-textarea v-model="content" label="Que voulez-vous dire?" rows="1" auto-grow></v-textarea>
+          <v-file-input
+            label="Une photo peut-être?"
+            accept="image/png, image/jpeg,
+                image/bmp"
+            prepend-icon="mdi-image"
+            v-model="imageUrl"
+          >
+          </v-file-input>
           <div class="CardNewPostBouton">
             <v-btn color="#B2DFDB" @click="send">
               Publier
@@ -38,6 +46,7 @@ export default {
       title: '',
       content: '',
       firstName: '',
+      imageUrl: [],
       showNewPostBloc: false,
       dialog: false,
     };
@@ -51,26 +60,28 @@ export default {
       })
       .catch((err) => {
         console.log(err);
+        this.$router.push('/');
       });
   },
   methods: {
     send() {
       const token = localStorage.getItem('acces_token');
-      const newPost = { title: this.title, content: this.content };
-      if (token) {
-        axios
-          .post('http://localhost:3000/api/posts/new', newPost, { headers: { 'Content-Type': 'application/json', Authorization: token } })
-          .then((response) => {
-            console.log(response);
-            window.location.reload();
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      } else {
-        alert('Session terminée veuillez vous reconnecter');
-        this.$router.push('/');
-      }
+      let newPost = { title: this.title, content: this.content };
+      // if (this.imageUrl.name) {
+      //   newPost = { title: this.title, content: this.content, imageUrl: this.imageUrl.name };
+      // } else {
+      //   newPost = { title: this.title, content: this.content };
+      // }
+
+      axios
+        .post('http://localhost:3000/api/posts/new', newPost, { headers: { 'Content-Type': 'application/json', Authorization: token } })
+        .then((response) => {
+          console.log(response);
+          window.location.reload();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
       this.title = '';
       this.content = '';
       this.showNewPostBloc = false;
@@ -79,6 +90,7 @@ export default {
       this.dialog = false;
       this.title = '';
       this.content = '';
+      this.imageUrl = [];
       this.showNewPostBloc = false;
     },
   },

@@ -1,6 +1,7 @@
 // Imports
 const bcrypt = require('bcrypt');
-const jwt = require('../middleware/auth');
+const jowt = require('../middleware/auth');
+const jwt = require('jsonwebtoken');
 const models = require('../models');
 const asyncLib = require('async');
 
@@ -75,7 +76,16 @@ module.exports = {
         if (newUser) {
           return res.status(201).json({
             userId: newUser.id,
-            token: jwt.generateTokenForUser(newUser),
+            token: jwt.sign(
+              {
+                userId: newUser.id,
+                isAdmin: newUser.isAdmin,
+              },
+              '$2y$10$y.V7MlX.fKDZuVsUsTnVBeKLpFHssV9AM7SSWSJJYE1Ij0MAgnUxW;',
+              {
+                expiresIn: '1h',
+              }
+            ),
           });
         } else {
           return res.status(500).json({ error: 'cannot add user' });
@@ -125,8 +135,16 @@ module.exports = {
         if (userFound) {
           return res.status(200).json({
             userId: userFound.id,
-            token: jwt.generateTokenForUser(userFound),
             isAdmin: userFound.isAdmin,
+            token: jwt.sign(
+              {
+                userId: userFound.id,
+              },
+              '$2y$10$y.V7MlX.fKDZuVsUsTnVBeKLpFHssV9AM7SSWSJJYE1Ij0MAgnUxW;',
+              {
+                expiresIn: '1h',
+              }
+            ),
           });
         } else {
           return res.status(500).json({ error: 'cannot log on user' });
@@ -136,12 +154,7 @@ module.exports = {
   },
 
   getUserProfile: (req, res) => {
-    // Getting auth header
-    const headerAuth = req.headers['authorization'];
-    const userId = jwt.getUserId(headerAuth);
-
-    if (userId < 0) return res.status(400).json({ error: 'wrong token' });
-
+    const userId = req.userId;
     models.User.findOne({
       attributes: ['id', 'email', 'firstName', 'lastName', 'isAdmin'],
       where: { id: userId },
@@ -154,14 +167,14 @@ module.exports = {
         }
       })
       .catch((err) => {
-        res.status(500).json({ error: 'cannot fetch user' });
+        res.status(501).json({ error: 'cannot fetch user' });
       });
   },
 
   updateUserProfile: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
-    const userId = jwt.getUserId(headerAuth);
+    const userId = jowt.getUserId(headerAuth);
 
     // Params
     const firstName = req.body.firstName;
@@ -221,7 +234,7 @@ module.exports = {
   deleteUserProfile: (req, res) => {
     // Getting auth header
     const headerAuth = req.headers['authorization'];
-    const userId = jwt.getUserId(headerAuth);
+    const userId = jowt.getUserId(headerAuth);
 
     if (userId < 0) return res.status(400).json({ error: 'wrong token' });
 
