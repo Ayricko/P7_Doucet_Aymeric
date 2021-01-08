@@ -66,7 +66,7 @@ export default {
   methods: {
     send() {
       const token = localStorage.getItem('acces_token');
-      let newPost = { title: this.title, content: this.content };
+      let newPost = { title: this.title, content: this.content, imageUrl: this.imageUrl.name };
       // if (this.imageUrl.name) {
       //   newPost = { title: this.title, content: this.content, imageUrl: this.imageUrl.name };
       // } else {

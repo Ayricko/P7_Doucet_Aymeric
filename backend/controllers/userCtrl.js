@@ -1,9 +1,8 @@
 // Imports
-const bcrypt = require('bcrypt');
-const jowt = require('../middleware/auth');
-const jwt = require('jsonwebtoken');
 const models = require('../models');
 const asyncLib = require('async');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 // Constants
 const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -154,6 +153,7 @@ module.exports = {
   },
 
   getUserProfile: (req, res) => {
+    // Getting userId decoded from middleware auth
     const userId = req.userId;
     models.User.findOne({
       attributes: ['id', 'email', 'firstName', 'lastName', 'isAdmin'],
@@ -172,9 +172,8 @@ module.exports = {
   },
 
   updateUserProfile: (req, res) => {
-    // Getting auth header
-    const headerAuth = req.headers['authorization'];
-    const userId = jowt.getUserId(headerAuth);
+    // Getting userId decoded from middleware auth
+    const userId = req.userId;
 
     // Params
     const firstName = req.body.firstName;
@@ -232,9 +231,8 @@ module.exports = {
   },
 
   deleteUserProfile: (req, res) => {
-    // Getting auth header
-    const headerAuth = req.headers['authorization'];
-    const userId = jowt.getUserId(headerAuth);
+    // Getting userId decoded from middleware auth
+    const userId = req.userId;
 
     if (userId < 0) return res.status(400).json({ error: 'wrong token' });
 

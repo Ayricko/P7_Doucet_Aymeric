@@ -1,18 +1,19 @@
-// Imports
 const jwt = require('jsonwebtoken');
-const JWT_SIGN_SECRET = '$2y$10$y.V7MlX.fKDZuVsUsTnVBeKLpFHssV9AM7SSWSJJYE1Ij0MAgnUxW;';
 
-// Exported functions
-module.exports = {
-  getUserId: (authorization) => {
-    let userId = -1;
-    let token = authorization;
-    if (token != null) {
-      try {
-        let jwtToken = jwt.verify(token, JWT_SIGN_SECRET);
-        if (jwtToken != null) userId = jwtToken.userId;
-      } catch (err) {}
+module.exports = (req, res, next) => {
+  try {
+    const token = req.headers.authorization;
+    const decodedToken = jwt.verify(token, '$2y$10$y.V7MlX.fKDZuVsUsTnVBeKLpFHssV9AM7SSWSJJYE1Ij0MAgnUxW;');
+    const userId = decodedToken.userId;
+    if (req.body.userId && req.body.userId != userId) {
+      throw 'Invalid user ID';
+    } else {
+      req.userId = userId;
+      next();
     }
-    return userId;
-  },
+  } catch {
+    res.status(401).json({
+      error: new Error('Invalid request!'),
+    });
+  }
 };

@@ -1,7 +1,6 @@
 // Imports
 const models = require('../models');
 const asyncLib = require('async');
-const jowt = require('../middleware/auth');
 
 // Constants
 const TITLE_LIMIT = 2;
@@ -11,10 +10,8 @@ const ITEMS_LIMIT = 50;
 // Routes
 module.exports = {
   createPost: (req, res) => {
-    // Getting auth header
-    const headerAuth = req.headers['authorization'];
-    const userId = jowt.getUserId(headerAuth);
-
+    // Getting userId decoded from middleware auth
+    const userId = req.userId;
     // Params
     const title = req.body.title;
     const content = req.body.content;
@@ -138,9 +135,8 @@ module.exports = {
       });
   },
   updatePost: (req, res) => {
-    // Getting auth header
-    const headerAuth = req.headers['authorization'];
-    const userId = jowt.getUserId(headerAuth);
+    // Getting userId decoded from middleware auth
+    const userId = req.userId;
 
     // Params
     const content = req.body.content;
@@ -202,9 +198,8 @@ module.exports = {
   },
 
   deletePost: (req, res) => {
-    // Getting auth header
-    const headerAuth = req.headers['authorization'];
-    const userId = jowt.getUserId(headerAuth);
+    // Getting userId decoded from middleware auth
+    const userId = req.userId;
 
     // Params
     const postId = parseInt(req.params.PostId);
