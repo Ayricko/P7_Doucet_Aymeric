@@ -15,7 +15,7 @@ module.exports = {
     // Params
     const title = req.body.title;
     const content = req.body.content;
-    const imageUrl = req.body.imageUrl;
+    const imageUrl = `${req.protocol}://${req.get('host')}/upload/${req.file.filename}`;
 
     if (title == null || content == null) {
       return res.status(400).json({ error: 'missing parameters' });

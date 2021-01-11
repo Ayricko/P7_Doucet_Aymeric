@@ -19,14 +19,21 @@
         <form class="InputBloc">
           <v-textarea v-model="title" label="Titre" rows="1" auto-grow></v-textarea>
           <v-textarea v-model="content" label="Que voulez-vous dire?" rows="1" auto-grow></v-textarea>
-          <v-file-input
+          <input
+            @change="getImage"
+            type="file"
+            accept="image/png, image/jpeg,
+                image/bmp, image/gif"
+            ref="file"
+          />
+          <!-- <v-file-input
             label="Une photo peut-être?"
             accept="image/png, image/jpeg,
                 image/bmp"
             prepend-icon="mdi-image"
             v-model="imageUrl"
           >
-          </v-file-input>
+          </v-file-input> -->
           <div class="CardNewPostBouton">
             <v-btn color="#B2DFDB" @click="send">
               Publier
@@ -46,7 +53,7 @@ export default {
       title: '',
       content: '',
       firstName: '',
-      imageUrl: [],
+      file: '',
       showNewPostBloc: false,
       dialog: false,
     };
@@ -64,15 +71,13 @@ export default {
       });
   },
   methods: {
+    getImage() {
+      this.file = this.$refs.file.files[0].name;
+    },
     send() {
       const token = localStorage.getItem('acces_token');
-      let newPost = { title: this.title, content: this.content, imageUrl: this.imageUrl.name };
-      // if (this.imageUrl.name) {
-      //   newPost = { title: this.title, content: this.content, imageUrl: this.imageUrl.name };
-      // } else {
-      //   newPost = { title: this.title, content: this.content };
-      // }
-
+      let newPost = { title: this.title, content: this.content, file: this.file };
+      console.log(newPost);
       axios
         .post('http://localhost:3000/api/posts/new', newPost, { headers: { 'Content-Type': 'application/json', Authorization: token } })
         .then((response) => {
@@ -84,13 +89,14 @@ export default {
         });
       this.title = '';
       this.content = '';
+      this.file = '';
       this.showNewPostBloc = false;
     },
     reset() {
       this.dialog = false;
       this.title = '';
       this.content = '';
-      this.imageUrl = [];
+      this.file = '';
       this.showNewPostBloc = false;
     },
   },
