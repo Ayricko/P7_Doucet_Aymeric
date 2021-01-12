@@ -76,10 +76,12 @@ export default {
     },
     send() {
       const token = localStorage.getItem('acces_token');
-      let newPost = { title: this.title, content: this.content, file: this.file };
-      console.log(newPost);
+      let newPost = { title: this.title, content: this.content };
+      const formData = new FormData();
+      formData.append('newPost', JSON.stringify(newPost));
+      formData.append('file', this.file);
       axios
-        .post('http://localhost:3000/api/posts/new', newPost, { headers: { 'Content-Type': 'application/json', Authorization: token } })
+        .post('http://localhost:3000/api/posts/new', formData, { headers: { Authorization: token } })
         .then((response) => {
           console.log(response);
           window.location.reload();
