@@ -5,7 +5,7 @@
         <h3>Connectez-vous</h3>
       </v-toolbar>
       <form>
-        <div class="inputBloc">
+        <div class="inputBlocAuth">
           <v-text-field v-model="email" label="E-mail" placeholder="Email"></v-text-field>
           <v-text-field
             v-model="password"
@@ -36,7 +36,7 @@
         <h3>Inscription</h3>
       </v-toolbar>
       <form>
-        <div class="inputBloc">
+        <div class="inputBlocAuth">
           <v-text-field v-model="lastName" label="Nom" placeholder="Nom" required></v-text-field>
           <v-text-field v-model="firstName" label="Prénom" placeholder="Prénom" required></v-text-field>
           <v-text-field v-model="email" label="E-mail" placeholder="Email"></v-text-field>
@@ -130,7 +130,7 @@ export default {
   max-width: 700px;
   margin: 50px auto 0 auto;
 }
-.inputBloc {
+.inputBlocAuth {
   padding: 30px;
 }
 .bouton {

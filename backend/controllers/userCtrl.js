@@ -16,6 +16,7 @@ module.exports = {
     const lastName = req.body.lastName;
     const firstName = req.body.firstName;
     const password = req.body.password;
+    const avatar = null;
 
     if (email == null || lastName == null || firstName == null || password == null) {
       return res.status(400).json({ error: 'missing parameters' });
@@ -63,6 +64,7 @@ module.exports = {
             lastName: lastName,
             firstName: firstName,
             password: bcryptedPassword,
+            avatar: avatar,
             isAdmin: 0,
           })
             .then((newUser) => {
@@ -156,7 +158,7 @@ module.exports = {
     // Getting userId decoded from middleware auth
     const userId = req.userId;
     models.User.findOne({
-      attributes: ['id', 'email', 'firstName', 'lastName', 'isAdmin'],
+      attributes: ['id', 'email', 'firstName', 'lastName', 'isAdmin', 'avatar'],
       where: { id: userId },
     })
       .then((user) => {
@@ -178,13 +180,14 @@ module.exports = {
     // Params
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
+    const avatar = null;
     const password = req.body.password;
 
     asyncLib.waterfall(
       [
         (done) => {
           models.User.findOne({
-            attributes: ['id', 'firstName', 'lastName'],
+            attributes: ['id', 'firstName', 'lastName', 'avatar'],
             where: { id: userId },
           })
             .then((userFound) => {
@@ -207,6 +210,7 @@ module.exports = {
               .update({
                 firstName: firstName ? firstName : userFound.firstName,
                 lastName: lastName ? lastName : userFound.lastName,
+                avatar: avatar ? avatar : userFound.avatar,
                 password: bcryptedPassword,
               })
               .then(() => {

@@ -10,12 +10,15 @@ const ITEMS_LIMIT = 50;
 // Routes
 module.exports = {
   createPost: (req, res) => {
+    let imageUrl = '';
     // Getting userId decoded from middleware auth
     const userId = req.userId;
     // Params
     const title = req.body.title;
     const content = req.body.content;
-    const imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+    if (req.file) {
+      imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+    }
 
     if (title == null || content == null) {
       return res.status(400).json({ error: 'missing parameters' });

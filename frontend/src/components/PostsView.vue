@@ -25,7 +25,7 @@
                 <v-icon class="iconMenu">mdi-delete</v-icon>
                 Supprimer
               </div>
-              <div v-if="post.UserId == userId || isAdmin == true" class="itemMenu" @click="dialogPostUpdate(post.id, post.content, post.title)">
+              <div v-if="post.UserId == userId" class="itemMenu" @click="dialogPostUpdate(post.id, post.content, post.title)">
                 <v-icon class="iconMenu">mdi-pencil</v-icon>
                 Modifier
               </div>
@@ -38,13 +38,16 @@
         </div>
         <h3 class="PostTitle">{{ post.title }}</h3>
         <div class="PostContent">{{ post.content }}</div>
+        <div v-if="post.imageUrl" class="test">
+          <img class="image" :src="post.imageUrl" alt="image postée par utilisateur" />
+        </div>
         <div @click="showComment = !showComment">
           <div v-if="post.Comments.length > 1" class="PostComment text--secondary">{{ post.Comments.length }} commentaires</div>
           <div v-else-if="post.Comments.length <= 1" class="PostComment text--secondary">{{ post.Comments.length }} commentaire</div>
         </div>
         <hr />
         <div class="Icon">
-          <v-btn text class="center">
+          <v-btn text class="center" @click="dialogAlertDevellopement">
             <v-icon color="#53AFA7">
               mdi-thumb-up-outline
             </v-icon>
@@ -56,7 +59,7 @@
             </v-icon>
             <div>Commenter</div>
           </v-btn>
-          <v-btn text class="center">
+          <v-btn text class="center" @click="dialogAlertDevellopement">
             <v-icon color="#53AFA7">
               mdi-share-outline
             </v-icon>
@@ -94,15 +97,15 @@
                       </v-icon>
                     </template>
                     <v-list>
-                      <div v-if="comment.UserId == userId || isAdmin == true" class="itemMenu" @click="deleteComment(comment.id)">
+                      <div v-if="comment.userId == userId || isAdmin == true" class="itemMenu" @click="deleteComment(comment.id)">
                         <v-icon class="iconMenu">mdi-delete</v-icon>
                         Supprimer
                       </div>
-                      <div v-if="comment.UserId == userId || isAdmin == true" class="itemMenu" @click="dialogUpdateComment(comment.id, comment.content)">
+                      <div v-if="comment.userId == userId" class="itemMenu" @click="dialogUpdateComment(comment.id, comment.content)">
                         <v-icon class="iconMenu">mdi-pencil</v-icon>
                         Modifier
                       </div>
-                      <div v-if="comment.UserId !== userId" class="itemMenu" @click="signaleComment(comment.id)">
+                      <div v-if="comment.userId !== userId" class="itemMenu" @click="signaleComment(comment.id)">
                         <v-icon class="iconMenu">mdi-alert-circle-outline</v-icon>
                         Signaler
                       </div>
@@ -125,11 +128,11 @@
           <div class="Cross">
             <v-icon color="#53AFA7" @click="closeDialogPostUpdate">mdi-close</v-icon>
           </div>
-          <h2 class="CardNewPostTitle">Modifier votre Post</h2>
-          <div class="InputBloc">
+          <h2>Modifier votre Post</h2>
+          <div class="InputBlocUpdate">
             <v-textarea placeholder="Titre" v-model="postUpdateTitle" rows="1" auto-grow></v-textarea>
             <v-textarea placeholder="Que vouliez-vous dire?" v-model="postUpdateContent" rows="1" auto-grow></v-textarea>
-            <div class="CardNewPostBouton">
+            <div class="DialogUpdateBouton">
               <v-btn @click="updatePost" color="#B2DFDB">
                 Enregistrer
               </v-btn>
@@ -145,15 +148,26 @@
           <div class="Cross">
             <v-icon color="#53AFA7" @click="closeDialogCommentUpdate">mdi-close</v-icon>
           </div>
-          <h2 class="CardNewPostTitle">Modifier votre commentaire</h2>
-          <div class="InputBloc">
+          <h2>Modifier votre commentaire</h2>
+          <div class="InputBlocUpdate">
             <v-textarea placeholder="Que vouliez-vous dire?" v-model="commentUpdateContent" rows="1" auto-grow></v-textarea>
-            <div class="CardNewPostBouton">
+            <div class="DialogUpdateBouton">
               <v-btn @click="updateComment" color="#B2DFDB">
                 Enregistrer
               </v-btn>
             </div>
           </div>
+        </v-card>
+      </template>
+    </v-dialog>
+    <!-- Under development -->
+    <v-dialog v-model="alertDevellopement" max-width="700">
+      <template>
+        <v-card>
+          <div class="Cross">
+            <v-icon color="#53AFA7" @click="closeAlertDevellopement">mdi-close</v-icon>
+          </div>
+          <h2 class="TextUnderDev">Encore un peu de patience, cette fonctionnalitée est en cours de dévellopement</h2>
         </v-card>
       </template>
     </v-dialog>
@@ -179,6 +193,7 @@ export default {
       dialog: false,
       postUpdate: false,
       commentUpdate: false,
+      alertDevellopement: false,
     };
   },
   mounted() {
@@ -322,10 +337,24 @@ export default {
           console.log(err);
         });
     },
+    dialogAlertDevellopement() {
+      this.alertDevellopement = true;
+    },
+    closeAlertDevellopement() {
+      this.alertDevellopement = false;
+    },
   },
 };
 </script>
 <style>
+.test {
+  text-align: center;
+}
+.image {
+  text-align: center;
+  max-width: 100%;
+  max-height: 300px;
+}
 .v-sheet.v-card {
   border-radius: 8px;
 }
@@ -407,6 +436,17 @@ export default {
 .CommentBody {
   padding: 10px 0 0 40px;
   min-height: 50px;
+}
+.InputBlocUpdate {
+  padding: 30px;
+}
+.DialogUpdateBouton {
+  display: flex;
+  justify-content: space-around;
+  padding: 30px 0 0 0;
+}
+.TextUnderDev {
+  padding: 0 30px 30px 30px;
 }
 @media screen and (max-width: 640px) {
   .Card {
