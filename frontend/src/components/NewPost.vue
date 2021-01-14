@@ -3,7 +3,8 @@
     <v-card class="PublicationCard">
       <div>
         <v-avatar class="AvatarSpace" color="#53AFA7">
-          <v-icon color="white">mdi-account</v-icon>
+          <img v-if="avatarUser" :src="avatarUser" alt="image postée par utilisateur" />
+          <v-icon v-else color="white">mdi-account</v-icon>
         </v-avatar>
       </div>
       <div class="PublicationCardBtn">
@@ -33,7 +34,7 @@
               <v-icon small color="white" @click="$refs.file.click()">mdi-image</v-icon>
             </v-avatar>
           </div>
-          <div class="testA">
+          <div class="ImageInputName">
             <div>{{ image.name }}</div>
             <v-icon v-if="image.name" color="#53AFA7" @click="resetImage">mdi-close</v-icon>
           </div>
@@ -57,6 +58,7 @@ export default {
       content: '',
       firstName: '',
       image: '',
+      avatarUser: '',
       showNewPostBloc: false,
       dialog: false,
     };
@@ -67,6 +69,7 @@ export default {
       .get('http://localhost:3000/api/users/profile', { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `${token}` } })
       .then((response) => {
         this.firstName = response.data.firstName;
+        this.avatarUser = response.data.avatar;
       })
       .catch((err) => {
         console.log(err);
@@ -83,7 +86,6 @@ export default {
       formData.append('title', this.title);
       formData.append('content', this.content);
       formData.append('image', this.image);
-      console.log(this.image);
       axios
         .post('http://localhost:3000/api/posts/new', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: token } })
         .then((response) => {
@@ -112,7 +114,7 @@ export default {
 };
 </script>
 <style>
-.testA {
+.ImageInputName {
   display: flex;
   flex-direction: row;
 }
@@ -120,13 +122,6 @@ export default {
   display: flex;
   justify-content: space-around;
   padding: 15px 0 15px 0;
-}
-.PublicationCard {
-  display: flex;
-  align-items: center;
-  max-width: 700px;
-  margin: 20px auto 20px auto;
-  padding: 20px;
 }
 .AvatarSpace {
   margin: 0 10px 0 0;

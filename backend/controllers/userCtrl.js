@@ -6,7 +6,8 @@ const jwt = require('jsonwebtoken');
 
 // Constants
 const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const PASSWORD_REGEX = /^(?=.*\d).{4,15}$/;
+const PASSWORD_REGEX = /^(?=.*[0-9]+.*)(?=.*[a-zA-Z]+.*)[0-9a-zA-Z]{8,}$/;
+const NAME_REGEX = /^(?=^[^\s'-]*[\s'-]?[^\s'-]*$)[a-zA-Z\s'-]{2,}$/;
 
 // Routes
 module.exports = {
@@ -18,23 +19,23 @@ module.exports = {
     const password = req.body.password;
     const avatar = null;
 
-    if (email == null || lastName == null || firstName == null || password == null) {
-      return res.status(400).json({ error: 'missing parameters' });
+    if (email == '' || lastName == '' || firstName == '' || password == '') {
+      return res.status(400).json({ error: "Veuillez saisir les champs nécessaire à l'inscription" });
     }
 
-    if (lastName.length >= 13 || lastName.length <= 2) {
-      return res.status(400).json({ error: 'wrong lastName (must be length 5 - 12)' });
+    if (lastName.length <= 2 || !NAME_REGEX.test(lastName)) {
+      return res.status(400).json({ error: 'Votre nom doit contenir au minimum 2 caractères' });
     }
-    if (firstName.length >= 13 || firstName.length <= 2) {
-      return res.status(400).json({ error: 'wrong firstName (must be length 5 - 12)' });
+    if (firstName.length <= 2 || !NAME_REGEX.test(firstName)) {
+      return res.status(400).json({ error: 'Votre prénom doit contenir au minimum 2 caractères' });
     }
 
     if (!EMAIL_REGEX.test(email)) {
-      return res.status(400).json({ error: 'email is not valid' });
+      return res.status(400).json({ error: "Le format de cet email n'est pas valide" });
     }
 
     if (!PASSWORD_REGEX.test(password)) {
-      return res.status(400).json({ error: 'password invalid (must length 4 - 8 and include 1 number at least)' });
+      return res.status(400).json({ error: 'Le mot de passe doit être un alphanumérique avec un minimum de 8 caractères' });
     }
 
     asyncLib.waterfall(
@@ -47,7 +48,7 @@ module.exports = {
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => res.status(500).json({ error: 'unable to verify user' }));
+            .catch((err) => res.status(500).json({ error: "Impossible de vérifier l'utilisateur" }));
         },
         (userFound, done) => {
           if (!userFound) {
@@ -55,7 +56,7 @@ module.exports = {
               done(null, userFound, bcryptedPassword);
             });
           } else {
-            return res.status(409).json({ error: 'user already exist' });
+            return res.status(409).json({ error: 'Ce compte existe déjà!' });
           }
         },
         (userFound, bcryptedPassword, done) => {
@@ -70,7 +71,7 @@ module.exports = {
             .then((newUser) => {
               done(newUser);
             })
-            .catch((err) => res.status(500).json({ error: 'cannot add user' }));
+            .catch((err) => res.status(500).json({ error: "Impossible d'enregistrer l'utilisateur" }));
         },
       ],
       (newUser) => {
@@ -89,7 +90,7 @@ module.exports = {
             ),
           });
         } else {
-          return res.status(500).json({ error: 'cannot add user' });
+          return res.status(500).json({ error: "Impossible d'enregistrer l'utilisateur" });
         }
       }
     );
@@ -100,8 +101,8 @@ module.exports = {
     const email = req.body.email;
     const password = req.body.password;
 
-    if (email == null || password == null) {
-      return res.status(400).json({ error: 'missing parameters' });
+    if (email === '' || password === '') {
+      return res.status(400).json({ error: "Veuillez saisir les champs nécessaire à l'authentification" });
     }
 
     asyncLib.waterfall(
@@ -113,7 +114,7 @@ module.exports = {
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => res.status(500).json({ error: 'unable to verify user' }));
+            .catch((err) => res.status(500).json({ error: 'Impossible de vérifier votre compte' }));
         },
         (userFound, done) => {
           if (userFound) {
@@ -121,14 +122,14 @@ module.exports = {
               done(null, userFound, resBycrypt);
             });
           } else {
-            return res.status(404).json({ error: 'user not exist in DB' });
+            return res.status(404).json({ error: "Cet email n'existe pas dans notre base de donnée" });
           }
         },
         (userFound, resBycrypt, done) => {
           if (resBycrypt) {
             done(userFound);
           } else {
-            return res.status(403).json({ error: 'invalid password' });
+            return res.status(403).json({ error: 'Le mot de passe saisi est incorrect' });
           }
         },
       ],
@@ -178,10 +179,18 @@ module.exports = {
     const userId = req.userId;
 
     // Params
+    let avatar = '';
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
-    const avatar = null;
-    const password = req.body.password;
+    if (firstName !== '' && !NAME_REGEX.test(firstName)) {
+      return res.status(400).json({ error: 'Votre prénom doit contenir au minimum 2 caractères sans caractères spéciaux' });
+    }
+    if (lastName !== '' && !NAME_REGEX.test(lastName)) {
+      return res.status(400).json({ error: 'Votre nom doit contenir au minimum 2 caractères sans caractères spéciaux' });
+    }
+    if (req.file) {
+      avatar = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+    }
 
     asyncLib.waterfall(
       [
@@ -197,21 +206,11 @@ module.exports = {
         },
         (userFound, done) => {
           if (userFound) {
-            bcrypt.hash(password, 5, (err, bcryptedPassword) => {
-              done(null, userFound, bcryptedPassword);
-            });
-          } else {
-            return res.status(409).json({ error: 'user already exist' });
-          }
-        },
-        (userFound, bcryptedPassword, done) => {
-          if (userFound) {
             userFound
               .update({
                 firstName: firstName ? firstName : userFound.firstName,
                 lastName: lastName ? lastName : userFound.lastName,
                 avatar: avatar ? avatar : userFound.avatar,
-                password: bcryptedPassword,
               })
               .then(() => {
                 done(userFound);

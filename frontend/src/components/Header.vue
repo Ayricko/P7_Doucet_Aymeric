@@ -17,7 +17,8 @@
       </div>
       <router-link to="/profil">
         <v-avatar color="#53AFA7">
-          <v-icon color="white">mdi-account</v-icon>
+          <img v-if="avatarUser" :src="avatarUser" alt="image postée par utilisateur" />
+          <v-icon v-else color="white">mdi-account</v-icon>
         </v-avatar>
         <span class="profilNav">{{ firstName }}</span>
       </router-link>
@@ -39,6 +40,7 @@ export default {
     return {
       firstName: '',
       isAdmin: '',
+      avatarUser: '',
     };
   },
   created() {
@@ -48,6 +50,7 @@ export default {
       .then((response) => {
         this.firstName = response.data.firstName;
         this.isAdmin = response.data.isAdmin;
+        this.avatarUser = response.data.avatar;
       })
       .catch((err) => {
         console.log(err);

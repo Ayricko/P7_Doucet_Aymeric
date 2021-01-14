@@ -82,7 +82,7 @@ module.exports = {
       include: [
         {
           model: models.User,
-          attributes: ['firstName', 'lastName'],
+          attributes: ['firstName', 'lastName', 'avatar'],
         },
         {
           model: models.Comment,
@@ -91,7 +91,7 @@ module.exports = {
           include: [
             {
               model: models.User,
-              attributes: ['firstName'],
+              attributes: ['firstName', 'avatar'],
             },
           ],
         },

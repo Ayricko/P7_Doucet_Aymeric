@@ -1,5 +1,5 @@
 <template>
-  <div class="background">
+  <div class="backgroundHV">
     <div v-if="userId !== null">
       <Header />
       <NewPost />
@@ -37,7 +37,7 @@ export default {
 };
 </script>
 <style>
-.background {
+.backgroundHV {
   width: 100%;
   height: 100%;
   background-color: #f1f4f0;

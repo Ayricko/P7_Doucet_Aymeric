@@ -1,11 +1,12 @@
 <template>
   <div>
     <div v-for="post in posts" :key="post.postId">
-      <v-card if class="Card">
+      <v-card class="Card">
         <div class="PostHeader">
           <div class="PostAvatar">
             <v-avatar color="#53AFA7">
-              <v-icon color="white">mdi-account</v-icon>
+              <img v-if="post.User.avatar" :src="post.User.avatar" alt="image postée par utilisateur" />
+              <v-icon v-else color="white">mdi-account</v-icon>
             </v-avatar>
             <div class="PostAvatarSpace">
               <h3>{{ post.User.firstName }}</h3>
@@ -38,12 +39,12 @@
         </div>
         <h3 class="PostTitle">{{ post.title }}</h3>
         <div class="PostContent">{{ post.content }}</div>
-        <div v-if="post.imageUrl" class="test">
-          <img class="image" :src="post.imageUrl" alt="image postée par utilisateur" />
+        <div v-if="post.imageUrl" class="PostImage">
+          <img class="Image" :src="post.imageUrl" alt="Photo du post" />
         </div>
         <div @click="showComment = !showComment">
           <div v-if="post.Comments.length > 1" class="PostComment text--secondary">{{ post.Comments.length }} commentaires</div>
-          <div v-else-if="post.Comments.length <= 1" class="PostComment text--secondary">{{ post.Comments.length }} commentaire</div>
+          <div v-else-if="post.Comments.length == 1" class="PostComment text--secondary">{{ post.Comments.length }} commentaire</div>
         </div>
         <hr />
         <div class="Icon">
@@ -70,7 +71,8 @@
           <hr />
           <div class="CommentFieldBloc">
             <v-avatar color="#53AFA7">
-              <v-icon color="white">mdi-account</v-icon>
+              <img v-if="avatarUser" :src="avatarUser" alt="image postée par utilisateur" />
+              <v-icon v-else color="white">mdi-account</v-icon>
             </v-avatar>
             <div class="CommentField">
               <v-text-field v-model="commentContent" placeholder="Ecrivez un commentaire..." filled rounded dense>
@@ -85,7 +87,8 @@
           <div v-for="comment in post.Comments" :key="comment.id">
             <div class="CommentArea">
               <v-avatar color="#53AFA7">
-                <v-icon color="white">mdi-account</v-icon>
+                <img v-if="comment.User.avatar" :src="comment.User.avatar" alt="image postée par utilisateur" />
+                <v-icon v-else color="white">mdi-account</v-icon>
               </v-avatar>
               <v-card class="CommentContent" color="#f1f4f0">
                 <div class="CommentHeader">
@@ -167,7 +170,7 @@
           <div class="Cross">
             <v-icon color="#53AFA7" @click="closeAlertDevellopement">mdi-close</v-icon>
           </div>
-          <h2 class="TextUnderDev">Encore un peu de patience, cette fonctionnalitée est en cours de dévellopement</h2>
+          <h3 class="TextUnderDev">Encore un peu de patience, cette fonctionnalitée est en cours de dévellopement!</h3>
         </v-card>
       </template>
     </v-dialog>
@@ -183,6 +186,7 @@ export default {
       showComment: false,
       userId: null,
       isAdmin: null,
+      avatarUser: '',
       posts: [],
       postUpdateId: '',
       postUpdateTitle: '',
@@ -203,6 +207,7 @@ export default {
       .then((response) => {
         this.isAdmin = response.data.isAdmin;
         this.userId = response.data.id;
+        this.avatarUser = response.data.avatar;
       })
       .catch((err) => {
         console.log(err);
@@ -212,7 +217,6 @@ export default {
       .get('http://localhost:3000/api/posts')
       .then((response) => {
         this.posts = response.data;
-        console.log(this.posts);
       })
       .catch((err) => {
         console.log(err);
@@ -251,8 +255,7 @@ export default {
       const newPost = { title: this.postUpdateTitle, content: this.postUpdateContent };
       axios
         .put(`http://localhost:3000/api/posts/${this.postUpdateId}/`, newPost, { headers: { 'Content-Type': 'application/json', Authorization: token } })
-        .then((response) => {
-          console.log(response);
+        .then(() => {
           window.location.reload();
         })
         .catch((err) => {
@@ -347,17 +350,24 @@ export default {
 };
 </script>
 <style>
-.test {
-  text-align: center;
-}
-.image {
-  text-align: center;
-  max-width: 100%;
-  max-height: 300px;
-}
 .v-sheet.v-card {
   border-radius: 8px;
 }
+.PublicationCard {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 20px auto 20px auto;
+  max-width: 700px;
+  padding: 20px;
+}
+.PostImage {
+  text-align: center;
+}
+.Image {
+  max-height: 300px;
+}
+
 .itemMenu {
   display: flex;
   padding: 15px 25px 15px 15px;
@@ -450,6 +460,9 @@ export default {
 }
 @media screen and (max-width: 640px) {
   .Card {
+    margin: 20px 20px 10px 20px;
+  }
+  .PublicationCard {
     margin: 20px 20px 10px 20px;
   }
 }

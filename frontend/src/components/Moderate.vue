@@ -40,6 +40,9 @@
         </div>
         <h3 class="PostTitle">{{ post.title }}</h3>
         <div class="PostContent">{{ post.content }}</div>
+        <div v-if="post.imageUrl" class="PostImage">
+          <img class="Image" :src="post.imageUrl" alt="Photo du post" />
+        </div>
       </v-card>
     </div>
     <h2>Les commentaire signalés</h2>

@@ -1,5 +1,5 @@
 <template>
-  <div class="background">
+  <div class="backgroundPV">
     <div v-if="userId !== null">
       <Header />
       <Profil />
@@ -36,7 +36,7 @@ export default {
 };
 </script>
 <style>
-.background {
+.backgroundPV {
   width: 100%;
   height: 100%;
   background-color: #f1f4f0;
