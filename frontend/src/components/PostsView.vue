@@ -26,7 +26,7 @@
                 <v-icon class="iconMenu">mdi-delete</v-icon>
                 Supprimer
               </div>
-              <div v-if="post.UserId == userId" class="itemMenu" @click="dialogPostUpdate(post.id, post.content, post.title)">
+              <div v-if="post.UserId == userId" class="itemMenu" @click="dialogPostUpdate(post.id, post.content, post.title, post.imageUrl)">
                 <v-icon class="iconMenu">mdi-pencil</v-icon>
                 Modifier
               </div>
@@ -135,6 +135,24 @@
           <div class="InputBlocUpdate">
             <v-textarea placeholder="Titre" v-model="postUpdateTitle" rows="1" auto-grow></v-textarea>
             <v-textarea placeholder="Que vouliez-vous dire?" v-model="postUpdateContent" rows="1" auto-grow></v-textarea>
+            <input
+              style="display: none"
+              @change="getImage"
+              type="file"
+              accept="image/png, image/jpeg,
+                image/bmp, image/gif"
+              ref="file"
+            />
+            <div class="imageInput">
+              <span class="text--secondary">Modifier la photo de votre publication: </span>
+              <v-avatar size="32" class="AvatarSpace" color="#53AFA7">
+                <v-icon small color="white" @click="$refs.file.click()">mdi-image</v-icon>
+              </v-avatar>
+            </div>
+            <div class="ImageInputName">
+              <div>{{ postUpdateImageUrl.name }}</div>
+              <v-icon v-if="postUpdateImageUrl.name" color="#53AFA7" @click="resetImage">mdi-close</v-icon>
+            </div>
             <div class="DialogUpdateBouton">
               <v-btn @click="updatePost" color="#B2DFDB">
                 Enregistrer
@@ -191,6 +209,7 @@ export default {
       postUpdateId: '',
       postUpdateTitle: '',
       postUpdateContent: '',
+      postUpdateImageUrl: '',
       commentUpdateId: '',
       commentUpdateContent: '',
       commentContent: '',
@@ -224,37 +243,49 @@ export default {
   },
 
   methods: {
+    getImage() {
+      this.postUpdateImageUrl = this.$refs.file.files[0];
+    },
+    resetImage() {
+      this.postUpdateImageUrl = '';
+    },
     deletePost(postId) {
       const token = localStorage.getItem('acces_token');
       axios
         .delete(`http://localhost:3000/api/posts/${postId}/`, { headers: { 'Content-Type': 'application/json', Authorization: token } })
         .then((response) => {
-          console.log(response);
           window.location.reload();
+          console.log(response);
+          console.log('salut');
         })
         .catch((err) => {
           console.log(err);
         });
     },
 
-    dialogPostUpdate(postId, postContent, postTitle) {
+    dialogPostUpdate(postId, postContent, postTitle, postImageUrl) {
       this.postUpdate = true;
       this.postUpdateId = postId;
       this.postUpdateContent = postContent;
       this.postUpdateTitle = postTitle;
+      this.postUpdateImageUrl = postImageUrl;
     },
 
     closeDialogPostUpdate() {
       this.postUpdate = false;
       this.postUpdateTitle = '';
       this.postUpdateContent = '';
+      this.postUpdateImageUrl = '';
     },
 
     updatePost() {
       const token = localStorage.getItem('acces_token');
-      const newPost = { title: this.postUpdateTitle, content: this.postUpdateContent };
+      const formData = new FormData();
+      formData.append('title', this.postUpdateTitle);
+      formData.append('content', this.postUpdateContent);
+      formData.append('image', this.postUpdateImageUrl);
       axios
-        .put(`http://localhost:3000/api/posts/${this.postUpdateId}/`, newPost, { headers: { 'Content-Type': 'application/json', Authorization: token } })
+        .put(`http://localhost:3000/api/posts/${this.postUpdateId}/`, formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: token } })
         .then(() => {
           window.location.reload();
         })

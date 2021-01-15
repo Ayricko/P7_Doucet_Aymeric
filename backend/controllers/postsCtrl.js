@@ -1,6 +1,7 @@
 // Imports
 const models = require('../models');
 const asyncLib = require('async');
+const fs = require('fs');
 
 // Constants
 const TITLE_LIMIT = 2;
@@ -21,10 +22,10 @@ module.exports = {
     }
 
     if (title == null || content == null) {
-      return res.status(400).json({ error: 'missing parameters' });
+      return res.status(400).json({ error: 'Vous avez oublié des champs' });
     }
     if (title <= TITLE_LIMIT || content <= CONTENT_LIMIT) {
-      return res.status(400).json({ error: 'invalid parameters' });
+      return res.status(400).json({ error: 'Certains champs sont invalides' });
     }
     asyncLib.waterfall(
       [
@@ -36,7 +37,7 @@ module.exports = {
               done(null, userFound);
             })
             .catch((err) => {
-              return res.status(500).json({ error: 'unable to verify user' });
+              return res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' });
             });
         },
         (userFound, done) => {
@@ -51,7 +52,7 @@ module.exports = {
               done(newPost);
             });
           } else {
-            return res.status(404).json({ error: 'user not found' });
+            return res.status(404).json({ error: 'Utilisateur introuvable' });
           }
         },
       ],
@@ -59,7 +60,7 @@ module.exports = {
         if (newPost) {
           return res.status(201).json(newPost);
         } else {
-          return res.status(500).json({ error: 'cannot post this Post' });
+          return res.status(500).json({ error: 'Impossible de publier ce post' });
         }
       }
     );
@@ -101,12 +102,12 @@ module.exports = {
         if (posts) {
           res.status(200).json(posts);
         } else {
-          res.status(404).json({ error: 'no posts found' });
+          res.status(404).json({ error: 'Aucun post trouvé' });
         }
       })
       .catch((err) => {
         console.log(err);
-        res.status(500).json({ error: 'invalid fields' });
+        res.status(500).json({ error: 'Certains champs sont invalide' });
       });
   },
   getOnePost: (req, res) => {
@@ -129,12 +130,12 @@ module.exports = {
         if (post) {
           res.status(200).json(post);
         } else {
-          res.status(404).json({ error: 'no posts found' });
+          res.status(404).json({ error: 'Aucun post trouvé' });
         }
       })
       .catch((err) => {
         console.log(err);
-        res.status(500).json({ error: 'invalid fields' });
+        res.status(500).json({ error: 'Certains champs sont invalide' });
       });
   },
   updatePost: (req, res) => {
@@ -142,9 +143,13 @@ module.exports = {
     const userId = req.userId;
 
     // Params
+    let imageUrl = '';
     const content = req.body.content;
     const title = req.body.title;
     const postId = parseInt(req.params.PostId);
+    if (req.file) {
+      imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+    }
 
     asyncLib.waterfall(
       [
@@ -156,37 +161,56 @@ module.exports = {
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => res.status(500).json({ error: 'unable to verify user' }));
+            .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
         },
         (userFound, done) => {
           if (userFound) {
             models.Post.findOne({
-              attributes: ['id', 'title', 'content', 'UserId'],
+              attributes: ['id', 'title', 'content', 'UserId', 'imageUrl'],
               where: { id: postId },
             })
               .then((post) => {
                 done(null, post, userFound);
               })
-              .catch((err) => res.status(500).json({ error: 'unable to verify user' }));
+              .catch((err) => res.status(500).json({ error: 'Impossible de trouver ce post' }));
           } else {
-            res.status(404).json({ error: 'user not found' });
+            res.status(404).json({ error: 'Utilisateur introuvable' });
           }
         },
         (post, userFound, done) => {
           if (post.UserId === userFound.id || userFound.isAdmin === true) {
-            post
-              .update({
-                title: title ? title : post.title,
-                content: content ? content : post.content,
-              })
-              .then(() => {
-                done(post);
-              })
-              .catch((err) => {
-                res.status(500).json({ message: 'cannot update this post' });
+            if (post.imageUrl && req.file) {
+              const oldImageUrl = post.imageUrl.split('/images')[1];
+              fs.unlink(`images/${oldImageUrl}`, () => {
+                post
+                  .update({
+                    title: title ? title : post.title,
+                    content: content ? content : post.content,
+                    imageUrl: imageUrl ? imageUrl : post.imageUrl,
+                  })
+                  .then(() => {
+                    done(post);
+                  })
+                  .catch((err) => {
+                    res.status(500).json({ message: 'Impossible de modifier ce post' });
+                  });
               });
+            } else {
+              post
+                .update({
+                  title: title ? title : post.title,
+                  content: content ? content : post.content,
+                  imageUrl: imageUrl ? imageUrl : post.imageUrl,
+                })
+                .then(() => {
+                  done(post);
+                })
+                .catch((err) => {
+                  res.status(500).json({ message: 'Impossible de modifier ce post' });
+                });
+            }
           } else {
-            res.status(404).json({ message: 'This user is not allowed to update this fucking post' });
+            res.status(404).json({ message: "Vous n'êtes pas autorisé à modifier ce post." });
           }
         },
       ],
@@ -194,7 +218,7 @@ module.exports = {
         if (post) {
           return res.status(201).json(post);
         } else {
-          return res.status(500).json({ error: 'cannot update post' });
+          return res.status(500).json({ error: 'Impossible de modifier ce post' });
         }
       }
     );
@@ -217,28 +241,36 @@ module.exports = {
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => res.status(500).json({ error: 'unable to verify user' }));
+            .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
         },
         (userFound, done) => {
           if (userFound) {
             models.Post.findOne({
-              attributes: ['id', 'UserId'],
+              attributes: ['id', 'UserId', 'imageUrl'],
               where: { id: postId },
             })
               .then((post) => {
                 done(null, post, userFound);
               })
-              .catch((err) => res.status(500).json({ error: 'unable to verify user' }));
+              .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
           } else {
-            res.status(404).json({ error: 'user not found' });
+            res.status(404).json({ error: 'Utilisateur introuvable' });
           }
         },
         (post, userFound, done) => {
           if (post.UserId === userFound.id || userFound.isAdmin === true) {
-            post.destroy(post);
-            res.status(200).json({ message: 'Post deleted' });
+            if (post.imageUrl) {
+              const imageName = post.imageUrl.split('/images')[1];
+              fs.unlink(`images/${imageName}`, () => {
+                post.destroy(post);
+                res.status(200).json({ message: 'Post supprimé.' });
+              });
+            } else {
+              post.destroy(post);
+              res.status(200).json({ message: 'Post supprimé.' });
+            }
           } else {
-            res.status(404).json({ error: 'This user is not allowed to delete this post' });
+            res.status(404).json({ error: "Vous n'êtes pas autorisé à supprimer ce post." });
             console.log(userFound);
           }
         },
@@ -247,7 +279,7 @@ module.exports = {
         if (post) {
           return res.status(201).json(post);
         } else {
-          return res.status(500).json({ error: 'cannot delete post' });
+          return res.status(500).json({ error: 'Impossible de supprimer ce post.' });
         }
       }
     );
@@ -268,7 +300,7 @@ module.exports = {
               done(null, post);
               console.log(post);
             })
-            .catch((err) => res.status(500).json({ error: 'unable to find post' }));
+            .catch((err) => res.status(500).json({ error: 'Impossible de trouver ce post' }));
         },
         (post, done) => {
           post
@@ -280,7 +312,7 @@ module.exports = {
               done(post);
             })
             .catch((err) => {
-              res.status(500).json({ error: 'cannot signal post' });
+              res.status(500).json({ error: 'Impossible de signaler le post.' });
             });
         },
       ],
@@ -288,7 +320,7 @@ module.exports = {
         if (post) {
           return res.status(201).json(post);
         } else {
-          return res.status(500).json({ error: 'cannot signal post' });
+          return res.status(500).json({ error: 'Impossible de signaler le post.' });
         }
       }
     );
@@ -308,7 +340,7 @@ module.exports = {
             .then((post) => {
               done(null, post);
             })
-            .catch((err) => res.status(500).json({ error: 'unable to find post' }));
+            .catch((err) => res.status(500).json({ error: 'Impossible de trouver ce post' }));
         },
         (post, done) => {
           post
@@ -320,7 +352,7 @@ module.exports = {
               done(post);
             })
             .catch((err) => {
-              res.status(500).json({ error: 'cannot delete signal post' });
+              res.status(500).json({ error: 'Impossible de supprimer le signalement.' });
             });
         },
       ],
@@ -328,7 +360,7 @@ module.exports = {
         if (post) {
           return res.status(201).json(post);
         } else {
-          return res.status(500).json({ error: 'cannot  delete signal post' });
+          return res.status(500).json({ error: 'Impossible de supprimer le signalement.' });
         }
       }
     );

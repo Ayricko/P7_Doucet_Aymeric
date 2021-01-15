@@ -3,7 +3,7 @@ const models = require('../models');
 const asyncLib = require('async');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
+const fs = require('fs');
 // Constants
 const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const PASSWORD_REGEX = /^(?=.*[0-9]+.*)(?=.*[a-zA-Z]+.*)[0-9a-zA-Z]{8,}$/;
@@ -166,7 +166,7 @@ module.exports = {
         if (user) {
           res.status(201).json(user);
         } else {
-          res.status(404).json({ error: 'user not found' });
+          res.status(404).json({ error: 'Utilisateur introuvable' });
         }
       })
       .catch((err) => {
@@ -202,24 +202,42 @@ module.exports = {
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => res.status(500).json({ error: 'unable to verify user' }));
+            .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
         },
         (userFound, done) => {
           if (userFound) {
-            userFound
-              .update({
-                firstName: firstName ? firstName : userFound.firstName,
-                lastName: lastName ? lastName : userFound.lastName,
-                avatar: avatar ? avatar : userFound.avatar,
-              })
-              .then(() => {
-                done(userFound);
-              })
-              .catch((err) => {
-                res.status(500).json({ error: 'cannot update user' });
+            if (userFound.avatar && req.file) {
+              const oldAvatar = userFound.avatar.split('/images')[1];
+              fs.unlink(`images/${oldAvatar}`, () => {
+                userFound
+                  .update({
+                    firstName: firstName ? firstName : userFound.firstName,
+                    lastName: lastName ? lastName : userFound.lastName,
+                    avatar: avatar ? avatar : userFound.avatar,
+                  })
+                  .then(() => {
+                    done(userFound);
+                  })
+                  .catch((err) => {
+                    res.status(500).json({ error: 'cannot update user' });
+                  });
               });
+            } else {
+              userFound
+                .update({
+                  firstName: firstName ? firstName : userFound.firstName,
+                  lastName: lastName ? lastName : userFound.lastName,
+                  avatar: avatar ? avatar : userFound.avatar,
+                })
+                .then(() => {
+                  done(userFound);
+                })
+                .catch((err) => {
+                  res.status(500).json({ error: 'cannot update user' });
+                });
+            }
           } else {
-            res.status(404).json({ error: 'user not found' });
+            res.status(404).json({ error: 'Utilisateur introuvable' });
           }
         },
       ],
@@ -237,15 +255,21 @@ module.exports = {
     // Getting userId decoded from middleware auth
     const userId = req.userId;
 
-    if (userId < 0) return res.status(400).json({ error: 'wrong token' });
-
     models.User.findOne({
       where: { id: userId },
     })
       .then((user) => {
         if (user) {
-          user.destroy(user);
-          res.status(200).json({ message: 'user deleted' });
+          if (user.avatar) {
+            const avatarName = user.avatar.split('/images')[1];
+            fs.unlink(`images/${avatarName}`, () => {
+              user.destroy(user);
+              res.status(200).json({ message: 'user deleted' });
+            });
+          } else {
+            user.destroy(user);
+            res.status(200).json({ message: 'user deleted' });
+          }
         } else {
           res.status(404).json({ error: 'user not found' });
         }

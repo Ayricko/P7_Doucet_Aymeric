@@ -8,7 +8,7 @@ const postsCtrl = require('../controllers/postsCtrl');
 router.post('/new/', auth, multer, postsCtrl.createPost);
 router.get('/', postsCtrl.getPosts);
 router.get('/:PostId/', postsCtrl.getOnePost);
-router.put('/:PostId/', auth, postsCtrl.updatePost);
+router.put('/:PostId/', auth, multer, postsCtrl.updatePost);
 router.delete('/:PostId/', auth, postsCtrl.deletePost);
 router.put('/:PostId/signale/', postsCtrl.signalePost);
 router.put('/:PostId/deleteSignale/', postsCtrl.deleteSignalePost);

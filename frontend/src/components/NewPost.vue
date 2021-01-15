@@ -80,6 +80,9 @@ export default {
     getImage() {
       this.image = this.$refs.file.files[0];
     },
+    resetImage() {
+      this.image = '';
+    },
     send() {
       const token = localStorage.getItem('acces_token');
       const formData = new FormData();
@@ -88,8 +91,7 @@ export default {
       formData.append('image', this.image);
       axios
         .post('http://localhost:3000/api/posts/new', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: token } })
-        .then((response) => {
-          console.log(response);
+        .then(() => {
           window.location.reload();
         })
         .catch((err) => {
@@ -106,9 +108,6 @@ export default {
       this.content = '';
       this.image = '';
       this.showNewPostBloc = false;
-    },
-    resetImage() {
-      this.image = '';
     },
   },
 };

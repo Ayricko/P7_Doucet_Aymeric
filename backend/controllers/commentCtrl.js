@@ -47,7 +47,7 @@ module.exports = {
               .then((userFound) => {
                 done(null, postFound, userFound);
               })
-              .catch((err) => res.status(500).json({ error: 'unable to verify user' }));
+              .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
           } else {
             res.status(404).json({ error: 'wrong PostId or UserId' });
           }
@@ -65,7 +65,7 @@ module.exports = {
               })
               .catch((err) => res.status(500).json({ error: 'unable to post the comment' }));
           } else {
-            return res.status(404).json({ error: 'user not found' });
+            return res.status(404).json({ error: 'Utilisateur introuvable' });
           }
         },
       ],
@@ -145,7 +145,7 @@ module.exports = {
               })
               .catch((err) => res.status(500).json({ error: 'invalide parameters' }));
           } else {
-            res.status(404).json({ error: 'user not found' });
+            res.status(404).json({ error: 'Utilisateur introuvable' });
           }
         },
         (comment, userFound, done) => {
@@ -192,7 +192,7 @@ module.exports = {
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => res.status(500).json({ error: 'unable to verify user' }));
+            .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
         },
         (userFound, done) => {
           if (userFound) {
@@ -203,9 +203,9 @@ module.exports = {
               .then((comment) => {
                 done(null, comment, userFound);
               })
-              .catch((err) => res.status(500).json({ error: 'unable to verify user' }));
+              .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
           } else {
-            res.status(404).json({ error: 'user not found' });
+            res.status(404).json({ error: 'Utilisateur introuvable' });
           }
         },
         (comment, userFound, done) => {
