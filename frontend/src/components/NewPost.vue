@@ -8,7 +8,7 @@
         </v-avatar>
       </div>
       <div class="PublicationCardBtn">
-        <v-btn class="Btn" large depressed plain rounded @click="dialog = true">Que voulez-vous dire, {{ firstName }} ?</v-btn>
+        <v-btn class="Btn text--secondary" large depressed plain rounded @click="dialog = true">Que voulez-vous dire, {{ firstName }} ?</v-btn>
       </div>
     </v-card>
     <v-dialog v-model="dialog" max-width="700">
@@ -54,6 +54,7 @@ export default {
   name: 'NewPost',
   data() {
     return {
+      token: '',
       title: '',
       content: '',
       firstName: '',
@@ -64,33 +65,25 @@ export default {
     };
   },
   mounted() {
-    const token = localStorage.getItem('acces_token');
+    this.token = localStorage.getItem('acces_token');
     axios
-      .get('http://localhost:3000/api/users/profile', { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `${token}` } })
+      .get('http://localhost:3000/api/users/profile', { headers: { Authorization: this.token } })
       .then((response) => {
         this.firstName = response.data.firstName;
         this.avatarUser = response.data.avatar;
       })
       .catch((err) => {
         console.log(err);
-        this.$router.push('/');
       });
   },
   methods: {
-    getImage() {
-      this.image = this.$refs.file.files[0];
-    },
-    resetImage() {
-      this.image = '';
-    },
     send() {
-      const token = localStorage.getItem('acces_token');
       const formData = new FormData();
       formData.append('title', this.title);
       formData.append('content', this.content);
       formData.append('image', this.image);
       axios
-        .post('http://localhost:3000/api/posts/new', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: token } })
+        .post('http://localhost:3000/api/posts/new', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: this.token } })
         .then(() => {
           window.location.reload();
         })
@@ -102,6 +95,12 @@ export default {
       this.image = '';
       this.showNewPostBloc = false;
     },
+    getImage() {
+      this.image = this.$refs.file.files[0];
+    },
+    resetImage() {
+      this.image = '';
+    },
     reset() {
       this.dialog = false;
       this.title = '';
@@ -112,7 +111,15 @@ export default {
   },
 };
 </script>
-<style>
+<style scoped>
+.PublicationCard {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 20px auto 20px auto;
+  max-width: 700px;
+  padding: 20px;
+}
 .ImageInputName {
   display: flex;
   flex-direction: row;
@@ -158,10 +165,10 @@ export default {
   padding: 30px 0 0 0;
 }
 @media screen and (max-width: 640px) {
-  .CardNewPost {
-    margin: 20px 20px 10px 20px;
-  }
   .PublicationCard {
+    margin: 20px 0 10px 0;
+  }
+  .CardNewPost {
     margin: 20px 20px 10px 20px;
   }
 }

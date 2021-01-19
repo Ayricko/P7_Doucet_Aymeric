@@ -40,12 +40,10 @@
         <h3 class="PostTitle">{{ post.title }}</h3>
         <div class="PostContent">{{ post.content }}</div>
         <div v-if="post.imageUrl" class="PostImage">
-          <img class="Image" :src="post.imageUrl" alt="Photo du post" />
+          <v-img class="photo" max-width="514" max-height="268" contain :src="post.imageUrl" alt="Photo du post"></v-img>
         </div>
-        <div @click="showComment = !showComment">
-          <div v-if="post.Comments.length > 1" class="PostComment text--secondary">{{ post.Comments.length }} commentaires</div>
-          <div v-else-if="post.Comments.length == 1" class="PostComment text--secondary">{{ post.Comments.length }} commentaire</div>
-        </div>
+        <div v-if="post.Comments.length > 1" class="PostComment text--secondary">{{ post.Comments.length }} commentaires</div>
+        <div v-else-if="post.Comments.length == 1" class="PostComment text--secondary">{{ post.Comments.length }} commentaire</div>
         <hr />
         <div class="Icon">
           <v-btn text class="center" @click="dialogAlertDevellopement">
@@ -54,7 +52,7 @@
             </v-icon>
             <div>Liker</div>
           </v-btn>
-          <v-btn text class="center" @click="showComment = !showComment">
+          <v-btn text class="center" @click="getComments(post.id)">
             <v-icon color="#53AFA7">
               mdi-comment-outline
             </v-icon>
@@ -67,7 +65,7 @@
             <div>Partager</div>
           </v-btn>
         </div>
-        <div class="Comment" v-if="showComment">
+        <div class="Comment" v-if="post.id == selectedPostId">
           <hr />
           <div class="CommentFieldBloc">
             <v-avatar color="#53AFA7">
@@ -84,7 +82,8 @@
               </v-text-field>
             </div>
           </div>
-          <div v-for="comment in post.Comments" :key="comment.id">
+
+          <div v-for="comment in comments" :key="comment.id">
             <div class="CommentArea">
               <v-avatar color="#53AFA7">
                 <img v-if="comment.User.avatar" :src="comment.User.avatar" alt="image postée par utilisateur" />
@@ -100,15 +99,15 @@
                       </v-icon>
                     </template>
                     <v-list>
-                      <div v-if="comment.userId == userId || isAdmin == true" class="itemMenu" @click="deleteComment(comment.id)">
+                      <div v-if="comment.UserId == userId || isAdmin == true" class="itemMenu" @click="deleteComment(comment.id)">
                         <v-icon class="iconMenu">mdi-delete</v-icon>
                         Supprimer
                       </div>
-                      <div v-if="comment.userId == userId" class="itemMenu" @click="dialogUpdateComment(comment.id, comment.content)">
+                      <div v-if="comment.UserId == userId" class="itemMenu" @click="dialogUpdateComment(comment.id, comment.content)">
                         <v-icon class="iconMenu">mdi-pencil</v-icon>
                         Modifier
                       </div>
-                      <div v-if="comment.userId !== userId" class="itemMenu" @click="signaleComment(comment.id)">
+                      <div v-if="comment.UserId !== userId" class="itemMenu" @click="signaleComment(comment.id)">
                         <v-icon class="iconMenu">mdi-alert-circle-outline</v-icon>
                         Signaler
                       </div>
@@ -201,11 +200,13 @@ export default {
   name: 'PostsView',
   data() {
     return {
-      showComment: false,
       userId: null,
       isAdmin: null,
+      token: '',
       avatarUser: '',
       posts: [],
+      comments: [],
+      selectedPostId: '',
       postUpdateId: '',
       postUpdateTitle: '',
       postUpdateContent: '',
@@ -220,9 +221,9 @@ export default {
     };
   },
   mounted() {
-    const token = localStorage.getItem('acces_token');
+    this.token = localStorage.getItem('acces_token');
     axios
-      .get('http://localhost:3000/api/users/profile', { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `${token}` } })
+      .get('http://localhost:3000/api/users/profile', { headers: { Authorization: this.token } })
       .then((response) => {
         this.isAdmin = response.data.isAdmin;
         this.userId = response.data.id;
@@ -233,7 +234,7 @@ export default {
       });
 
     axios
-      .get('http://localhost:3000/api/posts')
+      .get('http://localhost:3000/api/posts', { headers: { Authorization: this.token } })
       .then((response) => {
         this.posts = response.data;
       })
@@ -243,49 +244,35 @@ export default {
   },
 
   methods: {
-    getImage() {
-      this.postUpdateImageUrl = this.$refs.file.files[0];
-    },
-    resetImage() {
-      this.postUpdateImageUrl = '';
+    getComments(postId) {
+      (this.selectedPostId = postId),
+        axios
+          .get(`http://localhost:3000/api/comments/${postId}/byPost`, { headers: { Authorization: this.token } })
+          .then((response) => {
+            this.comments = response.data;
+          })
+          .catch((err) => {
+            console.log(err);
+          });
     },
     deletePost(postId) {
-      const token = localStorage.getItem('acces_token');
       axios
-        .delete(`http://localhost:3000/api/posts/${postId}/`, { headers: { 'Content-Type': 'application/json', Authorization: token } })
-        .then((response) => {
+        .delete(`http://localhost:3000/api/posts/${postId}/`, { headers: { Authorization: this.token } })
+        .then(() => {
           window.location.reload();
-          console.log(response);
-          console.log('salut');
         })
         .catch((err) => {
           console.log(err);
         });
     },
 
-    dialogPostUpdate(postId, postContent, postTitle, postImageUrl) {
-      this.postUpdate = true;
-      this.postUpdateId = postId;
-      this.postUpdateContent = postContent;
-      this.postUpdateTitle = postTitle;
-      this.postUpdateImageUrl = postImageUrl;
-    },
-
-    closeDialogPostUpdate() {
-      this.postUpdate = false;
-      this.postUpdateTitle = '';
-      this.postUpdateContent = '';
-      this.postUpdateImageUrl = '';
-    },
-
     updatePost() {
-      const token = localStorage.getItem('acces_token');
       const formData = new FormData();
       formData.append('title', this.postUpdateTitle);
       formData.append('content', this.postUpdateContent);
       formData.append('image', this.postUpdateImageUrl);
       axios
-        .put(`http://localhost:3000/api/posts/${this.postUpdateId}/`, formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: token } })
+        .put(`http://localhost:3000/api/posts/${this.postUpdateId}/`, formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: this.token } })
         .then(() => {
           window.location.reload();
         })
@@ -296,9 +283,8 @@ export default {
 
     signalePost(postId) {
       axios
-        .put(`http://localhost:3000/api/posts/${postId}/signale/`)
-        .then((response) => {
-          console.log(response);
+        .put(`http://localhost:3000/api/posts/${postId}/signale/`, { signale: '1' }, { headers: { 'Content-Type': 'application/json', Authorization: this.token } })
+        .then(() => {
           alert('Ce Post va être vérifié par un administrateur. Merci de votre contribution.');
           window.location.reload();
         })
@@ -308,12 +294,10 @@ export default {
     },
 
     sendComment(postId) {
-      const token = localStorage.getItem('acces_token');
       const newComment = { content: this.commentContent };
       axios
-        .post(`http://localhost:3000/api/comments/${postId}/new/`, newComment, { headers: { 'Content-Type': 'application/json', Authorization: token } })
-        .then((response) => {
-          console.log(response);
+        .post(`http://localhost:3000/api/comments/${postId}/new/`, newComment, { headers: { 'Content-Type': 'application/json', Authorization: this.token } })
+        .then(() => {
           window.location.reload();
         })
         .catch((err) => {
@@ -321,37 +305,22 @@ export default {
         });
     },
 
-    dialogUpdateComment(commentId, commentContent) {
-      this.commentUpdate = true;
-      this.commentUpdateId = commentId;
-      this.commentUpdateContent = commentContent;
-    },
-
-    closeDialogCommentUpdate() {
-      this.commentUpdate = false;
-      this.commentUpdateContent = '';
-    },
-
     updateComment() {
-      const token = localStorage.getItem('acces_token');
       const updatedComment = { content: this.commentUpdateContent };
       axios
-        .put(`http://localhost:3000/api/comments/${this.commentUpdateId}/`, updatedComment, { headers: { 'Content-Type': 'application/json', Authorization: token } })
-        .then((response) => {
-          console.log(response);
+        .put(`http://localhost:3000/api/comments/${this.commentUpdateId}/`, updatedComment, { headers: { 'Content-Type': 'application/json', Authorization: this.token } })
+        .then(() => {
           window.location.reload();
         })
         .catch((err) => {
-          console.log(err);
+          console.log(err.response);
         });
     },
 
     deleteComment(commentId) {
-      const token = localStorage.getItem('acces_token');
       axios
-        .delete(`http://localhost:3000/api/comments/${commentId}/`, { headers: { 'Content-Type': 'application/json', Authorization: token } })
-        .then((response) => {
-          console.log(response);
+        .delete(`http://localhost:3000/api/comments/${commentId}/`, { headers: { Authorization: this.token } })
+        .then(() => {
           window.location.reload();
         })
         .catch((err) => {
@@ -361,9 +330,8 @@ export default {
 
     signaleComment(commentId) {
       axios
-        .put(`http://localhost:3000/api/comments/${commentId}/signale/`)
-        .then((response) => {
-          console.log(response);
+        .put(`http://localhost:3000/api/comments/${commentId}/signale/`, { signale: '1' }, { headers: { 'Content-Type': 'application/json', Authorization: this.token } })
+        .then(() => {
           alert('Ce commentaire va être vérifié par un administrateur. Merci de votre contribution.');
           window.location.reload();
         })
@@ -371,32 +339,53 @@ export default {
           console.log(err);
         });
     },
+    dialogPostUpdate(postId, postContent, postTitle, postImageUrl) {
+      this.postUpdate = true;
+      this.postUpdateId = postId;
+      this.postUpdateContent = postContent;
+      this.postUpdateTitle = postTitle;
+      this.postUpdateImageUrl = postImageUrl;
+    },
+    closeDialogPostUpdate() {
+      this.postUpdate = false;
+      this.postUpdateTitle = '';
+      this.postUpdateContent = '';
+      this.postUpdateImageUrl = '';
+    },
+    dialogUpdateComment(commentId, commentContent) {
+      this.commentUpdate = true;
+      this.commentUpdateId = commentId;
+      this.commentUpdateContent = commentContent;
+    },
+    closeDialogCommentUpdate() {
+      this.commentUpdate = false;
+      this.commentUpdateContent = '';
+    },
     dialogAlertDevellopement() {
       this.alertDevellopement = true;
     },
     closeAlertDevellopement() {
       this.alertDevellopement = false;
     },
+    getImage() {
+      this.postUpdateImageUrl = this.$refs.file.files[0];
+    },
+    resetImage() {
+      this.postUpdateImageUrl = '';
+    },
   },
 };
 </script>
-<style>
+<style scoped>
+.photo {
+  margin: 10px auto 10px auto;
+}
 .v-sheet.v-card {
   border-radius: 8px;
 }
-.PublicationCard {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin: 20px auto 20px auto;
-  max-width: 700px;
-  padding: 20px;
-}
+
 .PostImage {
   text-align: center;
-}
-.Image {
-  max-height: 300px;
 }
 
 .itemMenu {
@@ -478,6 +467,10 @@ export default {
   padding: 10px 0 0 40px;
   min-height: 50px;
 }
+.Cross {
+  text-align: right;
+  padding: 10px 10px 0 0;
+}
 .InputBlocUpdate {
   padding: 30px;
 }
@@ -491,10 +484,7 @@ export default {
 }
 @media screen and (max-width: 640px) {
   .Card {
-    margin: 20px 20px 10px 20px;
-  }
-  .PublicationCard {
-    margin: 20px 20px 10px 20px;
+    margin: 20px 0 10px 0;
   }
 }
 </style>

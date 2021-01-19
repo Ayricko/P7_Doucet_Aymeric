@@ -5,10 +5,11 @@ const auth = require('../middleware/auth');
 const commentCtrl = require('../controllers/commentCtrl');
 
 router.post('/:PostId/new/', auth, commentCtrl.createComment);
-router.get('/', commentCtrl.getComments);
+router.get('/:PostId/byPost/', auth, commentCtrl.getComments);
+router.get('/signaled/', auth, commentCtrl.getCommentsSignaled);
 router.put('/:CommentId/', auth, commentCtrl.updateComment);
 router.delete('/:CommentId/', auth, commentCtrl.deleteComment);
-router.put('/:CommentId/signale/', commentCtrl.signaleComment);
-router.put('/:CommentId/deleteSignale/', commentCtrl.deleteSignaleComment);
+router.put('/:CommentId/signale/', auth, commentCtrl.signaleComment);
+router.put('/:CommentId/deleteSignale/', auth, commentCtrl.deleteSignaleComment);
 
 module.exports = router;

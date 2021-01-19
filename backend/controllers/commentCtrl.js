@@ -2,41 +2,23 @@
 const models = require('../models');
 const asyncLib = require('async');
 
-// Constants
-const CONTENT_LIMIT = 3;
-const ITEMS_LIMIT = 50;
-
 // Routes
 module.exports = {
   createComment: (req, res) => {
     // Getting userId decoded from middleware auth
     const userId = req.userId;
 
-    // Params
-    const content = req.body.content;
-    const PostId = parseInt(req.params.PostId);
-
-    if (content == null) {
-      return res.status(400).json({ error: 'missing content' });
-    }
-    if (content <= CONTENT_LIMIT) {
-      return res.status(400).json({ error: 'invalid content' });
-    }
-    if (PostId <= 0) {
-      return res.status(400).json({ error: 'invalid parameters' });
-    }
-
     asyncLib.waterfall(
       [
         (done) => {
           models.Post.findOne({
-            where: { id: PostId },
+            where: { id: req.params.PostId },
           })
             .then((postFound) => {
               done(null, postFound);
             })
             .catch((err) => {
-              return res.status(500).json({ error: 'unable to verify PostId' });
+              return res.status(500).json({ error: 'imposible de trouver le post' });
             });
         },
         (postFound, done) => {
@@ -49,13 +31,13 @@ module.exports = {
               })
               .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
           } else {
-            res.status(404).json({ error: 'wrong PostId or UserId' });
+            res.status(404).json({ error: 'Imposible de trouver cet utilisateur' });
           }
         },
         (postFound, userFound, done) => {
           if (postFound && userFound) {
             models.Comment.create({
-              content: content,
+              content: req.body.content,
               signale: 0,
               UserId: userFound.id,
               PostId: postFound.id,
@@ -63,7 +45,7 @@ module.exports = {
               .then((newComment) => {
                 done(newComment);
               })
-              .catch((err) => res.status(500).json({ error: 'unable to post the comment' }));
+              .catch((err) => res.status(500).json({ error: 'Impossible de publier ce commentaire' }));
           } else {
             return res.status(404).json({ error: 'Utilisateur introuvable' });
           }
@@ -73,31 +55,20 @@ module.exports = {
         if (newComment) {
           return res.status(200).json(newComment);
         } else {
-          return res.status(500).json({ error: 'cannot post this Comment' });
+          return res.status(500).json({ error: 'Impossible de publier ce commentaire' });
         }
       }
     );
   },
 
   getComments: (req, res) => {
-    // Constants
-    const fields = req.query.fields;
-    const limit = parseInt(req.query.limit);
-    const offset = parseInt(req.query.offset);
-    const order = req.query.order;
-
-    if (limit > ITEMS_LIMIT) {
-      limit = ITEMS_LIMIT;
-    }
     models.Comment.findAll({
-      order: [order != null ? order.split(':') : ['createdAt', 'DESC']],
-      attributes: fields !== '*' && fields != null ? fields.split(',') : null,
-      limit: !isNaN(limit) ? limit : null,
-      offset: !isNaN(offset) ? offset : null,
+      where: { postId: req.params.PostId },
+      order: [['createdAt', 'DESC']],
       include: [
         {
           model: models.User,
-          attributes: ['firstName', 'lastName'],
+          attributes: ['firstName', 'lastName', 'avatar'],
         },
       ],
     })
@@ -105,22 +76,18 @@ module.exports = {
         if (comments) {
           res.status(200).json(comments);
         } else {
-          res.status(404).json({ error: 'no comments found' });
+          res.status(404).json({ error: 'Aucun commentaire trouvé' });
         }
       })
       .catch((err) => {
         console.log(err);
-        res.status(500).json({ error: 'invalid fields' });
+        res.status(500).json({ error: 'Problème serveur' });
       });
   },
 
   updateComment: (req, res) => {
     // Getting userId decoded from middleware auth
     const userId = req.userId;
-
-    // Params
-    const content = req.body.content;
-    const commentId = parseInt(req.params.CommentId);
 
     asyncLib.waterfall(
       [
@@ -132,18 +99,18 @@ module.exports = {
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => res.status(500).json({ error: 'unable to verify this user' }));
+            .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
         },
         (userFound, done) => {
           if (userFound) {
             models.Comment.findOne({
               attributes: ['id', 'content', 'UserId'],
-              where: { id: commentId },
+              where: { id: req.params.CommentId },
             })
               .then((comment) => {
                 done(null, comment, userFound);
               })
-              .catch((err) => res.status(500).json({ error: 'invalide parameters' }));
+              .catch((err) => res.status(500).json({ error: 'Impossible de trouver le commentaire' }));
           } else {
             res.status(404).json({ error: 'Utilisateur introuvable' });
           }
@@ -152,16 +119,16 @@ module.exports = {
           if (comment.UserId === userFound.id || userFound.isAdmin === true) {
             comment
               .update({
-                content: content ? content : comment.content,
+                content: req.body.content ? req.body.content : comment.content,
               })
               .then(() => {
                 done(comment);
               })
               .catch((err) => {
-                res.status(500).json({ error: 'cannot update comment' });
+                res.status(500).json({ error: 'Impossible de modifier ce commentaire' });
               });
           } else {
-            res.status(404).json({ error: 'This user is not allowed to update this comment' });
+            res.status(404).json({ error: "Cet utilisateur n'est pas autorisé a modifier ce commentaire" });
           }
         },
       ],
@@ -169,10 +136,34 @@ module.exports = {
         if (comment) {
           return res.status(201).json(comment);
         } else {
-          return res.status(500).json({ error: 'cannot update comment content' });
+          return res.status(500).json({ error: 'Impossible de modifier ce commentaire' });
         }
       }
     );
+  },
+
+  getCommentsSignaled: (req, res) => {
+    models.Comment.findAll({
+      where: { signale: true },
+      order: [['createdAt', 'DESC']],
+      include: [
+        {
+          model: models.User,
+          attributes: ['firstName', 'lastName'],
+        },
+      ],
+    })
+      .then((comments) => {
+        if (comments) {
+          res.status(200).json(comments);
+        } else {
+          res.status(404).json({ error: 'Aucun commentaire trouvé' });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ error: 'Problème serveur' });
+      });
   },
 
   deleteComment: (req, res) => {
@@ -211,9 +202,9 @@ module.exports = {
         (comment, userFound, done) => {
           if (comment.UserId === userFound.id || userFound.isAdmin === true) {
             comment.destroy(comment);
-            res.status(200).json({ message: 'comment deleted' });
+            res.status(200).json({ message: 'Commentaire supprimé' });
           } else {
-            res.status(404).json({ error: 'This user is not allowed to delete this comment' });
+            res.status(404).json({ error: "Cet utilisateur n'est pas autorisé a supprimer ce commentaire" });
           }
         },
       ],
@@ -221,7 +212,7 @@ module.exports = {
         if (comment) {
           return res.status(201).json(comment);
         } else {
-          return res.status(500).json({ error: 'cannot delete comment' });
+          return res.status(500).json({ error: 'Impossible de supprimer le commentaire' });
         }
       }
     );
@@ -230,30 +221,29 @@ module.exports = {
   signaleComment: (req, res) => {
     // Params
     const signale = true;
-    const commentId = parseInt(req.params.CommentId);
 
     asyncLib.waterfall(
       [
         (done) => {
           models.Comment.findOne({
             attributes: ['id', 'signale'],
-            where: { id: commentId },
+            where: { id: req.params.CommentId },
           })
             .then((comment) => {
               done(null, comment);
             })
-            .catch((err) => res.status(500).json({ error: 'unable to find comment' }));
+            .catch((err) => res.status(500).json({ error: 'Impossible de trouver le commentaire' }));
         },
         (comment, done) => {
           comment
             .update({
-              signale: signale ? signale : comment.signale,
+              signale: req.body.signale,
             })
             .then(() => {
               done(comment);
             })
             .catch((err) => {
-              res.status(500).json({ error: 'cannot signal comment' });
+              res.status(500).json({ error: 'Impossible de signaler le commentaire' });
             });
         },
       ],
@@ -261,7 +251,7 @@ module.exports = {
         if (comment) {
           return res.status(201).json(comment);
         } else {
-          return res.status(500).json({ error: 'cannot signal comment' });
+          return res.status(500).json({ error: 'Impossible de signaler le commentaire' });
         }
       }
     );
@@ -269,30 +259,29 @@ module.exports = {
   deleteSignaleComment: (req, res) => {
     // Params
     const signale = -1;
-    const commentId = parseInt(req.params.CommentId);
 
     asyncLib.waterfall(
       [
         (done) => {
           models.Comment.findOne({
             attributes: ['id', 'signale'],
-            where: { id: commentId },
+            where: { id: req.params.CommentId },
           })
             .then((comment) => {
               done(null, comment);
             })
-            .catch((err) => res.status(500).json({ error: 'unable to find comment' }));
+            .catch((err) => res.status(500).json({ error: 'Impossible de trouver le commentaire' }));
         },
         (comment, done) => {
           comment
             .update({
-              signale: signale ? signale : comment.signale,
+              signale: req.body.signale,
             })
             .then(() => {
               done(comment);
             })
             .catch((err) => {
-              res.status(500).json({ error: 'cannot signal comment' });
+              res.status(500).json({ error: 'Impossible de supprimer le signalement' });
             });
         },
       ],
@@ -300,7 +289,7 @@ module.exports = {
         if (comment) {
           return res.status(201).json(comment);
         } else {
-          return res.status(500).json({ error: 'cannot signal comment' });
+          return res.status(500).json({ error: 'Impossible de supprimer le signalement' });
         }
       }
     );

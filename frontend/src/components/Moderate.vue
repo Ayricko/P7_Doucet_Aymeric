@@ -41,7 +41,7 @@
         <h3 class="PostTitle">{{ post.title }}</h3>
         <div class="PostContent">{{ post.content }}</div>
         <div v-if="post.imageUrl" class="PostImage">
-          <img class="Image" :src="post.imageUrl" alt="Photo du post" />
+          <v-img class="photo" max-width="514" max-height="268" contain :src="post.imageUrl" alt="Photo du post"></v-img>
         </div>
       </v-card>
     </div>
@@ -92,14 +92,15 @@ export default {
     return {
       userId: null,
       isAdmin: null,
+      token: '',
       posts: [],
       comments: [],
     };
   },
   mounted() {
-    const token = localStorage.getItem('acces_token');
+    this.token = localStorage.getItem('acces_token');
     axios
-      .get('http://localhost:3000/api/users/profile', { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `${token}` } })
+      .get('http://localhost:3000/api/users/profile', { headers: { Authorization: this.token } })
       .then((response) => {
         this.isAdmin = response.data.isAdmin;
         this.userId = response.data.id;
@@ -110,7 +111,7 @@ export default {
       });
 
     axios
-      .get('http://localhost:3000/api/posts')
+      .get('http://localhost:3000/api/posts/signaled/', { headers: { Authorization: this.token } })
       .then((response) => {
         this.posts = response.data;
       })
@@ -119,7 +120,7 @@ export default {
       });
 
     axios
-      .get('http://localhost:3000/api/comments')
+      .get('http://localhost:3000/api/comments/signaled/', { headers: { Authorization: this.token } })
       .then((response) => {
         this.comments = response.data;
       })
@@ -129,37 +130,33 @@ export default {
   },
 
   methods: {
-    home() {
-      this.$router.push('/home');
-    },
     deletePost(postId) {
-      const token = localStorage.getItem('acces_token');
       axios
-        .delete(`http://localhost:3000/api/posts/${postId}/`, { headers: { 'Content-Type': 'application/json', Authorization: token } })
+        .delete(`http://localhost:3000/api/posts/${postId}/`, { headers: { Authorization: this.token } })
         .then((response) => {
           console.log(response);
           window.location.reload();
         })
         .catch((err) => {
-          console.log(err);
+          console.log(err.response);
         });
     },
     deleteSignale(postId) {
       axios
-        .put(`http://localhost:3000/api/posts/${postId}/deleteSignale/`)
+        .put(`http://localhost:3000/api/posts/${postId}/deleteSignale/`, { signale: '-1' }, { headers: { 'Content-Type': 'application/json', Authorization: this.token } })
         .then((response) => {
           console.log(response);
           window.location.reload();
         })
         .catch((err) => {
-          console.log(err);
+          console.log(err.response);
+          console.log(this.token);
         });
     },
 
     deleteComment(commentId) {
-      const token = localStorage.getItem('acces_token');
       axios
-        .delete(`http://localhost:3000/api/comments/${commentId}/`, { headers: { 'Content-Type': 'application/json', Authorization: token } })
+        .delete(`http://localhost:3000/api/comments/${commentId}/`, { headers: { Authorization: this.token } })
         .then((response) => {
           console.log(response);
           window.location.reload();
@@ -171,7 +168,7 @@ export default {
 
     deleteSignaleComment(commentId) {
       axios
-        .put(`http://localhost:3000/api/comments/${commentId}/deleteSignale/`)
+        .put(`http://localhost:3000/api/comments/${commentId}/deleteSignale/`, { signale: '-1' }, { headers: { 'Content-Type': 'application/json', Authorization: this.token } })
         .then((response) => {
           console.log(response);
           window.location.reload();
@@ -180,10 +177,16 @@ export default {
           console.log(err);
         });
     },
+    home() {
+      this.$router.push('/home');
+    },
   },
 };
 </script>
-<style>
+<style scoped>
+.photo {
+  margin: 10px auto 10px auto;
+}
 .home {
   display: flex;
   justify-content: center;
@@ -276,7 +279,7 @@ h2 {
 }
 @media screen and (max-width: 640px) {
   .Card {
-    margin: 20px 20px 10px 20px;
+    margin: 20px 0px 10px 0px;
   }
 }
 </style>

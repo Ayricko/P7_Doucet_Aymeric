@@ -7,7 +7,7 @@ const fs = require('fs');
 // Constants
 const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const PASSWORD_REGEX = /^(?=.*[0-9]+.*)(?=.*[a-zA-Z]+.*)[0-9a-zA-Z]{8,}$/;
-const NAME_REGEX = /^(?=^[^\s'-]*[\s'-]?[^\s'-]*$)[a-zA-Z\s'-]{2,}$/;
+const NAME_REGEX = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
 
 // Routes
 module.exports = {
@@ -149,7 +149,7 @@ module.exports = {
             ),
           });
         } else {
-          return res.status(500).json({ error: 'cannot log on user' });
+          return res.status(500).json({ error: 'Impossible de connecter cet utilisateur' });
         }
       }
     );
@@ -170,7 +170,7 @@ module.exports = {
         }
       })
       .catch((err) => {
-        res.status(501).json({ error: 'cannot fetch user' });
+        res.status(501).json({ error: 'Impossible de trouver cet utilisateur' });
       });
   },
 

@@ -6,7 +6,6 @@ const fs = require('fs');
 // Constants
 const TITLE_LIMIT = 2;
 const CONTENT_LIMIT = 3;
-const ITEMS_LIMIT = 50;
 
 // Routes
 module.exports = {
@@ -20,7 +19,6 @@ module.exports = {
     if (req.file) {
       imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
     }
-
     if (title == null || content == null) {
       return res.status(400).json({ error: 'Vous avez oublié des champs' });
     }
@@ -66,35 +64,16 @@ module.exports = {
     );
   },
   getPosts: (req, res) => {
-    const fields = req.query.fields;
-    const limit = parseInt(req.query.limit);
-    const offset = parseInt(req.query.offset);
-    const order = req.query.order;
-
-    if (limit > ITEMS_LIMIT) {
-      limit = ITEMS_LIMIT;
-    }
-
     models.Post.findAll({
-      order: [order != null ? order.split(':') : ['createdAt', 'DESC']],
-      attributes: fields !== '*' && fields != null ? fields.split(',') : null,
-      limit: !isNaN(limit) ? limit : null,
-      offset: !isNaN(offset) ? offset : null,
+      order: [['createdAt', 'DESC']],
       include: [
+        {
+          model: models.Comment,
+          attributes: ['PostId'],
+        },
         {
           model: models.User,
           attributes: ['firstName', 'lastName', 'avatar'],
-        },
-        {
-          model: models.Comment,
-          order: ['createdAt', 'DESC'],
-          attributes: ['id', 'content', 'userId', 'createdAt', 'signale'],
-          include: [
-            {
-              model: models.User,
-              attributes: ['firstName', 'avatar'],
-            },
-          ],
         },
       ],
     })
@@ -284,31 +263,48 @@ module.exports = {
       }
     );
   },
+  getPostsSignaled: (req, res) => {
+    models.Post.findAll({
+      where: { signale: true },
+      order: [['createdAt', 'DESC']],
+      include: [
+        {
+          model: models.User,
+          attributes: ['firstName', 'lastName'],
+        },
+      ],
+    })
+      .then((posts) => {
+        if (posts) {
+          res.status(200).json(posts);
+        } else {
+          res.status(404).json({ error: 'Aucun post trouvé' });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ error: 'Problème serveur' });
+      });
+  },
   signalePost: (req, res) => {
-    // Params
-    const signale = 1;
-    const postId = parseInt(req.params.PostId);
-
     asyncLib.waterfall(
       [
         (done) => {
           models.Post.findOne({
             attributes: ['id', 'signale'],
-            where: { id: postId },
+            where: { id: req.params.PostId },
           })
             .then((post) => {
               done(null, post);
-              console.log(post);
             })
             .catch((err) => res.status(500).json({ error: 'Impossible de trouver ce post' }));
         },
         (post, done) => {
           post
             .update({
-              signale: signale ? signale : post.signale,
+              signale: req.body.signale,
             })
             .then(() => {
-              console.log(post);
               done(post);
             })
             .catch((err) => {
@@ -326,16 +322,12 @@ module.exports = {
     );
   },
   deleteSignalePost: (req, res) => {
-    // Params
-    const signale = -1;
-    const postId = parseInt(req.params.PostId);
-
     asyncLib.waterfall(
       [
         (done) => {
           models.Post.findOne({
             attributes: ['id', 'signale'],
-            where: { id: postId },
+            where: { id: req.params.PostId },
           })
             .then((post) => {
               done(null, post);
@@ -345,7 +337,7 @@ module.exports = {
         (post, done) => {
           post
             .update({
-              signale: signale ? signale : post.signale,
+              signale: req.body.signale,
             })
             .then(() => {
               console.log(post);
