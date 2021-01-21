@@ -18,10 +18,12 @@
 ### Frontend:
 
 Depuis le terminal de votre éditeur, placez vous dans le dossier front-end et exécuter la commande suivante:
-npm install
+
+`npm install`
 
 Puis executer:
-npm run serve
+
+`npm run serve`
 
 Rendez-vous ensuite à l'adress suivante:
 http://localhost:8080/
@@ -29,10 +31,12 @@ http://localhost:8080/
 ### Backend:
 
 Depuis le terminal de votre éditeur, placez vous dans le dossier back-end et exécuter la commande suivante:
-npm install
+
+`npm install`
 
 Puis executer:
-nodemon serve
+
+`nodemon serve`
 
 ### Base de donnée:
 
