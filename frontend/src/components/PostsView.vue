@@ -42,8 +42,8 @@
         <div v-if="post.imageUrl" class="PostImage">
           <v-img class="photo" max-width="514" max-height="268" contain :src="post.imageUrl" alt="Photo du post"></v-img>
         </div>
-        <div v-if="post.Comments.length > 1" class="PostComment text--secondary">{{ post.Comments.length }} commentaires</div>
-        <div v-else-if="post.Comments.length == 1" class="PostComment text--secondary">{{ post.Comments.length }} commentaire</div>
+        <div v-if="post.Comments.length > 1" class="PostComment text--secondary" @click="getComments(post.id)">{{ post.Comments.length }} commentaires</div>
+        <div v-else-if="post.Comments.length == 1" class="PostComment text--secondary" @click="getComments(post.id)">{{ post.Comments.length }} commentaire</div>
         <hr />
         <div class="Icon">
           <v-btn text class="center" @click="dialogAlertDevellopement">
@@ -222,16 +222,19 @@ export default {
   },
   mounted() {
     this.token = localStorage.getItem('acces_token');
-    axios
-      .get('http://localhost:3000/api/users/profile', { headers: { Authorization: this.token } })
-      .then((response) => {
-        this.isAdmin = response.data.isAdmin;
-        this.userId = response.data.id;
-        this.avatarUser = response.data.avatar;
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    if (this.isAdmin === null) {
+      console.log('fetch Profil');
+      axios
+        .get('http://localhost:3000/api/users/profile', { headers: { Authorization: this.token } })
+        .then((response) => {
+          this.isAdmin = response.data.isAdmin;
+          this.userId = response.data.id;
+          this.avatarUser = response.data.avatar;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
 
     axios
       .get('http://localhost:3000/api/posts', { headers: { Authorization: this.token } })
@@ -244,28 +247,6 @@ export default {
   },
 
   methods: {
-    getComments(postId) {
-      (this.selectedPostId = postId),
-        axios
-          .get(`http://localhost:3000/api/comments/${postId}/byPost`, { headers: { Authorization: this.token } })
-          .then((response) => {
-            this.comments = response.data;
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-    },
-    deletePost(postId) {
-      axios
-        .delete(`http://localhost:3000/api/posts/${postId}/`, { headers: { Authorization: this.token } })
-        .then(() => {
-          window.location.reload();
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-
     updatePost() {
       const formData = new FormData();
       formData.append('title', this.postUpdateTitle);
@@ -280,7 +261,6 @@ export default {
           console.log(err);
         });
     },
-
     signalePost(postId) {
       axios
         .put(`http://localhost:3000/api/posts/${postId}/signale/`, { signale: '1' }, { headers: { 'Content-Type': 'application/json', Authorization: this.token } })
@@ -292,7 +272,28 @@ export default {
           console.log(err);
         });
     },
-
+    deletePost(postId) {
+      axios
+        .delete(`http://localhost:3000/api/posts/${postId}/`, { headers: { Authorization: this.token } })
+        .then(() => {
+          window.location.reload();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    getComments(postId) {
+      (this.selectedPostId = postId),
+        axios
+          .get(`http://localhost:3000/api/comments/${postId}/byPost`, { headers: { Authorization: this.token } })
+          .then((response) => {
+            this.comments = response.data;
+            console.log(this.comments);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+    },
     sendComment(postId) {
       const newComment = { content: this.commentContent };
       axios

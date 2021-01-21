@@ -144,21 +144,18 @@ export default {
     deleteSignale(postId) {
       axios
         .put(`http://localhost:3000/api/posts/${postId}/deleteSignale/`, { signale: '-1' }, { headers: { 'Content-Type': 'application/json', Authorization: this.token } })
-        .then((response) => {
-          console.log(response);
+        .then(() => {
           window.location.reload();
         })
         .catch((err) => {
           console.log(err.response);
-          console.log(this.token);
         });
     },
 
     deleteComment(commentId) {
       axios
         .delete(`http://localhost:3000/api/comments/${commentId}/`, { headers: { Authorization: this.token } })
-        .then((response) => {
-          console.log(response);
+        .then(() => {
           window.location.reload();
         })
         .catch((err) => {
@@ -169,8 +166,7 @@ export default {
     deleteSignaleComment(commentId) {
       axios
         .put(`http://localhost:3000/api/comments/${commentId}/deleteSignale/`, { signale: '-1' }, { headers: { 'Content-Type': 'application/json', Authorization: this.token } })
-        .then((response) => {
-          console.log(response);
+        .then(() => {
           window.location.reload();
         })
         .catch((err) => {

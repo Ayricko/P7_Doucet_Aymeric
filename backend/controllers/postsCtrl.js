@@ -250,7 +250,6 @@ module.exports = {
             }
           } else {
             res.status(404).json({ error: "Vous n'êtes pas autorisé à supprimer ce post." });
-            console.log(userFound);
           }
         },
       ],
