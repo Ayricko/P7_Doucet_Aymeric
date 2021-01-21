@@ -12,7 +12,7 @@ db.sequelize
   .authenticate()
   .then(() => {
     console.log('Connexion réussie');
-    // db.sequelize.sync({ force: true });
+    db.sequelize.sync();
   })
   .catch((err) => {
     console.log('une erreur est survenue', err);
