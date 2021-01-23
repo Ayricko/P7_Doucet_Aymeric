@@ -48,7 +48,8 @@ Avec cette application Grouponmania vous pourrez:
 - Ajouter/modifier votre photo de profil, modifier vos informations de base (nom, prénom)
 - Accèder aux publications des autres utilisateurs.
 - Publier des posts avec ou sans photos.
-- Modifier vos posts, les supprimer, et signaler les posts des autres utilisateurs pour les soumettres à l'administrateur.
+- Commenter les posts.
+- Modifier vos posts/commentaires, les supprimer, mais aussi signaler les posts/commentaires des autres utilisateurs pour les soumettres à l'administrateur.
 
 ## Auteurs
 
