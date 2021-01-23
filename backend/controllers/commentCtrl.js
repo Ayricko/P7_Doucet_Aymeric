@@ -6,7 +6,7 @@ const asyncLib = require('async');
 module.exports = {
   createComment: (req, res) => {
     // Getting userId decoded from middleware auth
-    const userId = req.userId;
+    const UserIdDecoded = req.userId;
 
     asyncLib.waterfall(
       [
@@ -17,19 +17,19 @@ module.exports = {
             .then((postFound) => {
               done(null, postFound);
             })
-            .catch((err) => {
+            .catch(() => {
               return res.status(500).json({ error: 'imposible de trouver le post' });
             });
         },
         (postFound, done) => {
           if (postFound) {
             models.User.findOne({
-              where: { id: userId },
+              where: { id: UserIdDecoded },
             })
               .then((userFound) => {
                 done(null, postFound, userFound);
               })
-              .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
+              .catch(() => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
           } else {
             res.status(404).json({ error: 'Imposible de trouver cet utilisateur' });
           }
@@ -45,7 +45,7 @@ module.exports = {
               .then((newComment) => {
                 done(newComment);
               })
-              .catch((err) => res.status(500).json({ error: 'Impossible de publier ce commentaire' }));
+              .catch(() => res.status(500).json({ error: 'Impossible de publier ce commentaire' }));
           } else {
             return res.status(404).json({ error: 'Utilisateur introuvable' });
           }
@@ -79,27 +79,26 @@ module.exports = {
           res.status(404).json({ error: 'Aucun commentaire trouvé' });
         }
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         res.status(500).json({ error: 'Problème serveur' });
       });
   },
 
   updateComment: (req, res) => {
     // Getting userId decoded from middleware auth
-    const userId = req.userId;
+    const UserIdDecoded = req.userId;
 
     asyncLib.waterfall(
       [
         (done) => {
           models.User.findOne({
             attributes: ['id', 'isAdmin'],
-            where: { id: userId },
+            where: { id: UserIdDecoded },
           })
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
+            .catch(() => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
         },
         (userFound, done) => {
           if (userFound) {
@@ -110,7 +109,7 @@ module.exports = {
               .then((comment) => {
                 done(null, comment, userFound);
               })
-              .catch((err) => res.status(500).json({ error: 'Impossible de trouver le commentaire' }));
+              .catch(() => res.status(500).json({ error: 'Impossible de trouver le commentaire' }));
           } else {
             res.status(404).json({ error: 'Utilisateur introuvable' });
           }
@@ -124,7 +123,7 @@ module.exports = {
               .then(() => {
                 done(comment);
               })
-              .catch((err) => {
+              .catch(() => {
                 res.status(500).json({ error: 'Impossible de modifier ce commentaire' });
               });
           } else {
@@ -160,41 +159,37 @@ module.exports = {
           res.status(404).json({ error: 'Aucun commentaire trouvé' });
         }
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         res.status(500).json({ error: 'Problème serveur' });
       });
   },
 
   deleteComment: (req, res) => {
     // Getting userId decoded from middleware auth
-    const userId = req.userId;
-
-    // Params
-    const commentId = parseInt(req.params.CommentId);
+    const UserIdDecoded = req.userId;
 
     asyncLib.waterfall(
       [
         (done) => {
           models.User.findOne({
             attributes: ['id', 'isAdmin'],
-            where: { id: userId },
+            where: { id: UserIdDecoded },
           })
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
+            .catch(() => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
         },
         (userFound, done) => {
           if (userFound) {
             models.Comment.findOne({
               attributes: ['id', 'UserId'],
-              where: { id: commentId },
+              where: { id: req.params.CommentId },
             })
               .then((comment) => {
                 done(null, comment, userFound);
               })
-              .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
+              .catch(() => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
           } else {
             res.status(404).json({ error: 'Utilisateur introuvable' });
           }
@@ -219,9 +214,6 @@ module.exports = {
   },
 
   signaleComment: (req, res) => {
-    // Params
-    const signale = true;
-
     asyncLib.waterfall(
       [
         (done) => {
@@ -232,7 +224,7 @@ module.exports = {
             .then((comment) => {
               done(null, comment);
             })
-            .catch((err) => res.status(500).json({ error: 'Impossible de trouver le commentaire' }));
+            .catch(() => res.status(500).json({ error: 'Impossible de trouver le commentaire' }));
         },
         (comment, done) => {
           comment
@@ -242,7 +234,7 @@ module.exports = {
             .then(() => {
               done(comment);
             })
-            .catch((err) => {
+            .catch(() => {
               res.status(500).json({ error: 'Impossible de signaler le commentaire' });
             });
         },
@@ -257,9 +249,6 @@ module.exports = {
     );
   },
   deleteSignaleComment: (req, res) => {
-    // Params
-    const signale = -1;
-
     asyncLib.waterfall(
       [
         (done) => {
@@ -270,7 +259,7 @@ module.exports = {
             .then((comment) => {
               done(null, comment);
             })
-            .catch((err) => res.status(500).json({ error: 'Impossible de trouver le commentaire' }));
+            .catch(() => res.status(500).json({ error: 'Impossible de trouver le commentaire' }));
         },
         (comment, done) => {
           comment
@@ -280,7 +269,7 @@ module.exports = {
             .then(() => {
               done(comment);
             })
-            .catch((err) => {
+            .catch(() => {
               res.status(500).json({ error: 'Impossible de supprimer le signalement' });
             });
         },

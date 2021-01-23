@@ -13,28 +13,28 @@ const NAME_REGEX = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
 module.exports = {
   register: (req, res) => {
     // Params
-    const email = req.body.email;
-    const lastName = req.body.lastName;
-    const firstName = req.body.firstName;
-    const password = req.body.password;
-    const avatar = null;
+    const Email = req.body.email;
+    const LastName = req.body.lastName;
+    const FirstName = req.body.firstName;
+    const Password = req.body.password;
+    const Avatar = null;
 
-    if (email == '' || lastName == '' || firstName == '' || password == '') {
+    if (Email == '' || LastName == '' || FirstName == '' || Password == '') {
       return res.status(400).json({ error: "Veuillez saisir les champs nécessaire à l'inscription" });
     }
 
-    if (lastName.length <= 2 || !NAME_REGEX.test(lastName)) {
+    if (LastName.length <= 2 || !NAME_REGEX.test(LastName)) {
       return res.status(400).json({ error: 'Votre nom doit contenir au minimum 2 caractères' });
     }
-    if (firstName.length <= 2 || !NAME_REGEX.test(firstName)) {
+    if (FirstName.length <= 2 || !NAME_REGEX.test(FirstName)) {
       return res.status(400).json({ error: 'Votre prénom doit contenir au minimum 2 caractères' });
     }
 
-    if (!EMAIL_REGEX.test(email)) {
+    if (!EMAIL_REGEX.test(Email)) {
       return res.status(400).json({ error: "Le format de cet email n'est pas valide" });
     }
 
-    if (!PASSWORD_REGEX.test(password)) {
+    if (!PASSWORD_REGEX.test(Password)) {
       return res.status(400).json({ error: 'Le mot de passe doit être un alphanumérique avec un minimum de 8 caractères' });
     }
 
@@ -43,35 +43,35 @@ module.exports = {
         (done) => {
           models.User.findOne({
             attributes: ['email'],
-            where: { email: email },
+            where: { email: Email },
           })
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => res.status(500).json({ error: "Impossible de vérifier l'utilisateur" }));
+            .catch(() => res.status(500).json({ error: "Impossible de vérifier l'utilisateur" }));
         },
         (userFound, done) => {
           if (!userFound) {
-            bcrypt.hash(password, 5, (err, bcryptedPassword) => {
-              done(null, userFound, bcryptedPassword);
+            bcrypt.hash(Password, 5, (_err, bcryptedPassword) => {
+              done(null, bcryptedPassword);
             });
           } else {
             return res.status(409).json({ error: 'Ce compte existe déjà!' });
           }
         },
-        (userFound, bcryptedPassword, done) => {
-          const newUser = models.User.create({
-            email: email,
-            lastName: lastName,
-            firstName: firstName,
+        (bcryptedPassword, done) => {
+          models.User.create({
+            email: Email,
+            lastName: LastName,
+            firstName: FirstName,
             password: bcryptedPassword,
-            avatar: avatar,
+            avatar: Avatar,
             isAdmin: 0,
           })
             .then((newUser) => {
               done(newUser);
             })
-            .catch((err) => res.status(500).json({ error: "Impossible d'enregistrer l'utilisateur" }));
+            .catch(() => res.status(500).json({ error: "Impossible d'enregistrer l'utilisateur" }));
         },
       ],
       (newUser) => {
@@ -98,10 +98,10 @@ module.exports = {
 
   login: (req, res) => {
     // Params
-    const email = req.body.email;
-    const password = req.body.password;
+    const Email = req.body.email;
+    const Password = req.body.password;
 
-    if (email === '' || password === '') {
+    if (Email === '' || Password === '') {
       return res.status(400).json({ error: "Veuillez saisir les champs nécessaire à l'authentification" });
     }
 
@@ -109,16 +109,16 @@ module.exports = {
       [
         (done) => {
           models.User.findOne({
-            where: { email: email },
+            where: { email: Email },
           })
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => res.status(500).json({ error: 'Impossible de vérifier votre compte' }));
+            .catch(() => res.status(500).json({ error: 'Impossible de vérifier votre compte' }));
         },
         (userFound, done) => {
           if (userFound) {
-            bcrypt.compare(password, userFound.password, (errBycrypt, resBycrypt) => {
+            bcrypt.compare(Password, userFound.password, (errBycrypt, resBycrypt) => {
               done(null, userFound, resBycrypt);
             });
           } else {
@@ -157,10 +157,10 @@ module.exports = {
 
   getUserProfile: (req, res) => {
     // Getting userId decoded from middleware auth
-    const userId = req.userId;
+    const UserIdDecoded = req.userId;
     models.User.findOne({
       attributes: ['id', 'email', 'firstName', 'lastName', 'isAdmin', 'avatar'],
-      where: { id: userId },
+      where: { id: UserIdDecoded },
     })
       .then((user) => {
         if (user) {
@@ -169,27 +169,27 @@ module.exports = {
           res.status(404).json({ error: 'Utilisateur introuvable' });
         }
       })
-      .catch((err) => {
+      .catch(() => {
         res.status(501).json({ error: 'Impossible de trouver cet utilisateur' });
       });
   },
 
   updateUserProfile: (req, res) => {
     // Getting userId decoded from middleware auth
-    const userId = req.userId;
+    const UserIdDecoded = req.userId;
 
     // Params
-    let avatar = '';
-    const firstName = req.body.firstName;
-    const lastName = req.body.lastName;
-    if (firstName !== '' && !NAME_REGEX.test(firstName)) {
+    let Avatar = '';
+    const FirstName = req.body.firstName;
+    const LastName = req.body.lastName;
+    if (FirstName !== '' && !NAME_REGEX.test(FirstName)) {
       return res.status(400).json({ error: 'Votre prénom doit contenir au minimum 2 caractères sans caractères spéciaux' });
     }
-    if (lastName !== '' && !NAME_REGEX.test(lastName)) {
+    if (LastName !== '' && !NAME_REGEX.test(LastName)) {
       return res.status(400).json({ error: 'Votre nom doit contenir au minimum 2 caractères sans caractères spéciaux' });
     }
     if (req.file) {
-      avatar = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+      Avatar = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
     }
 
     asyncLib.waterfall(
@@ -197,12 +197,12 @@ module.exports = {
         (done) => {
           models.User.findOne({
             attributes: ['id', 'firstName', 'lastName', 'avatar'],
-            where: { id: userId },
+            where: { id: UserIdDecoded },
           })
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
+            .catch(() => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
         },
         (userFound, done) => {
           if (userFound) {
@@ -211,28 +211,28 @@ module.exports = {
               fs.unlink(`images/${oldAvatar}`, () => {
                 userFound
                   .update({
-                    firstName: firstName ? firstName : userFound.firstName,
-                    lastName: lastName ? lastName : userFound.lastName,
-                    avatar: avatar ? avatar : userFound.avatar,
+                    firstName: FirstName ? FirstName : userFound.firstName,
+                    lastName: LastName ? LastName : userFound.lastName,
+                    avatar: Avatar ? Avatar : userFound.avatar,
                   })
                   .then(() => {
                     done(userFound);
                   })
-                  .catch((err) => {
+                  .catch(() => {
                     res.status(500).json({ error: 'cannot update user' });
                   });
               });
             } else {
               userFound
                 .update({
-                  firstName: firstName ? firstName : userFound.firstName,
-                  lastName: lastName ? lastName : userFound.lastName,
-                  avatar: avatar ? avatar : userFound.avatar,
+                  firstName: FirstName ? FirstName : userFound.firstName,
+                  lastName: LastName ? LastName : userFound.lastName,
+                  avatar: Avatar ? Avatar : userFound.avatar,
                 })
                 .then(() => {
                   done(userFound);
                 })
-                .catch((err) => {
+                .catch(() => {
                   res.status(500).json({ error: 'cannot update user' });
                 });
             }
@@ -253,10 +253,10 @@ module.exports = {
 
   deleteUserProfile: (req, res) => {
     // Getting userId decoded from middleware auth
-    const userId = req.userId;
+    const UserIdDecoded = req.userId;
 
     models.User.findOne({
-      where: { id: userId },
+      where: { id: UserIdDecoded },
     })
       .then((user) => {
         if (user) {
@@ -264,18 +264,18 @@ module.exports = {
             const avatarName = user.avatar.split('/images')[1];
             fs.unlink(`images/${avatarName}`, () => {
               user.destroy(user);
-              res.status(200).json({ message: 'user deleted' });
+              res.status(200).json({ message: 'Utilisateur supprimé' });
             });
           } else {
             user.destroy(user);
-            res.status(200).json({ message: 'user deleted' });
+            res.status(200).json({ message: 'Utilisateur supprimé' });
           }
         } else {
-          res.status(404).json({ error: 'user not found' });
+          res.status(404).json({ error: 'Utilisateur introuvable' });
         }
       })
-      .catch((err) => {
-        res.status(500).json({ error: 'cannot fetch user' });
+      .catch(() => {
+        res.status(500).json({ error: "Imposible de charger l'utilisateur" });
       });
   },
 };

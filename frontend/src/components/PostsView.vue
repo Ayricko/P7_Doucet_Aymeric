@@ -128,7 +128,7 @@
       <template>
         <v-card>
           <div class="Cross">
-            <v-icon color="#53AFA7" @click="closeDialogPostUpdate">mdi-close</v-icon>
+            <v-icon color="#53AFA7" @click="closeAlert">mdi-close</v-icon>
           </div>
           <h2>Modifier votre Post</h2>
           <div class="InputBlocUpdate">
@@ -166,7 +166,7 @@
       <template>
         <v-card>
           <div class="Cross">
-            <v-icon color="#53AFA7" @click="closeDialogCommentUpdate">mdi-close</v-icon>
+            <v-icon color="#53AFA7" @click="closeAlert">mdi-close</v-icon>
           </div>
           <h2>Modifier votre commentaire</h2>
           <div class="InputBlocUpdate">
@@ -180,14 +180,14 @@
         </v-card>
       </template>
     </v-dialog>
-    <!-- Under development -->
-    <v-dialog v-model="alertDevellopement" max-width="700">
+    <!-- Alert -->
+    <v-dialog v-model="alert" max-width="700">
       <template>
         <v-card>
           <div class="Cross">
-            <v-icon color="#53AFA7" @click="closeAlertDevellopement">mdi-close</v-icon>
+            <v-icon color="#53AFA7" @click="closeAlert">mdi-close</v-icon>
           </div>
-          <h3 class="TextUnderDev">Encore un peu de patience, cette fonctionnalitée est en cours de dévellopement!</h3>
+          <h3 class="TextUnderDev">{{ message }}</h3>
         </v-card>
       </template>
     </v-dialog>
@@ -217,24 +217,23 @@ export default {
       dialog: false,
       postUpdate: false,
       commentUpdate: false,
-      alertDevellopement: false,
+      message: '',
+      alert: false,
     };
   },
   mounted() {
     this.token = localStorage.getItem('acces_token');
-    if (this.isAdmin === null) {
-      console.log('fetch Profil');
-      axios
-        .get('http://localhost:3000/api/users/profile', { headers: { Authorization: this.token } })
-        .then((response) => {
-          this.isAdmin = response.data.isAdmin;
-          this.userId = response.data.id;
-          this.avatarUser = response.data.avatar;
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
+    axios
+      .get('http://localhost:3000/api/users/profile', { headers: { Authorization: this.token } })
+      .then((response) => {
+        this.isAdmin = response.data.isAdmin;
+        this.userId = response.data.id;
+        this.avatarUser = response.data.avatar;
+      })
+      .catch((err) => {
+        console.log(err);
+        this.$router.push('/');
+      });
 
     axios
       .get('http://localhost:3000/api/posts', { headers: { Authorization: this.token } })
@@ -265,8 +264,8 @@ export default {
       axios
         .put(`http://localhost:3000/api/posts/${postId}/signale/`, { signale: '1' }, { headers: { 'Content-Type': 'application/json', Authorization: this.token } })
         .then(() => {
-          alert('Ce Post va être vérifié par un administrateur. Merci de votre contribution.');
-          window.location.reload();
+          this.alert = true;
+          this.message = 'Ce post va être vérifié par un administrateur. Merci de votre contribution.';
         })
         .catch((err) => {
           console.log(err);
@@ -333,8 +332,8 @@ export default {
       axios
         .put(`http://localhost:3000/api/comments/${commentId}/signale/`, { signale: '1' }, { headers: { 'Content-Type': 'application/json', Authorization: this.token } })
         .then(() => {
-          alert('Ce commentaire va être vérifié par un administrateur. Merci de votre contribution.');
-          window.location.reload();
+          this.alert = true;
+          this.message = 'Ce commentaire va être vérifié par un administrateur. Merci de votre contribution.';
         })
         .catch((err) => {
           console.log(err);
@@ -347,26 +346,23 @@ export default {
       this.postUpdateTitle = postTitle;
       this.postUpdateImageUrl = postImageUrl;
     },
-    closeDialogPostUpdate() {
-      this.postUpdate = false;
-      this.postUpdateTitle = '';
-      this.postUpdateContent = '';
-      this.postUpdateImageUrl = '';
-    },
     dialogUpdateComment(commentId, commentContent) {
       this.commentUpdate = true;
       this.commentUpdateId = commentId;
       this.commentUpdateContent = commentContent;
     },
-    closeDialogCommentUpdate() {
+    dialogAlertDevellopement() {
+      this.alert = true;
+      this.message = 'Encore un peu de patience, cette fonctionnalitée est en cours de dévellopement!';
+    },
+    closeAlert() {
+      this.alert = false;
+      this.postUpdate = false;
+      this.postUpdateTitle = '';
+      this.postUpdateContent = '';
+      this.postUpdateImageUrl = '';
       this.commentUpdate = false;
       this.commentUpdateContent = '';
-    },
-    dialogAlertDevellopement() {
-      this.alertDevellopement = true;
-    },
-    closeAlertDevellopement() {
-      this.alertDevellopement = false;
     },
     getImage() {
       this.postUpdateImageUrl = this.$refs.file.files[0];

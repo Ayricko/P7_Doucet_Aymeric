@@ -12,37 +12,37 @@ module.exports = {
   createPost: (req, res) => {
     let imageUrl = '';
     // Getting userId decoded from middleware auth
-    const userId = req.userId;
+    const UserIdDecoded = req.userId;
     // Params
-    const title = req.body.title;
-    const content = req.body.content;
+    const Title = req.body.title;
+    const Content = req.body.content;
     if (req.file) {
       imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
     }
-    if (title == null || content == null) {
+    if (Title == null || Content == null) {
       return res.status(400).json({ error: 'Vous avez oublié des champs' });
     }
-    if (title <= TITLE_LIMIT || content <= CONTENT_LIMIT) {
+    if (Title <= TITLE_LIMIT || Content <= CONTENT_LIMIT) {
       return res.status(400).json({ error: 'Certains champs sont invalides' });
     }
     asyncLib.waterfall(
       [
         (done) => {
           models.User.findOne({
-            where: { id: userId },
+            where: { id: UserIdDecoded },
           })
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => {
+            .catch(() => {
               return res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' });
             });
         },
         (userFound, done) => {
           if (userFound) {
             models.Post.create({
-              title: title,
-              content: content,
+              title: Title,
+              content: Content,
               signale: 0,
               UserId: userFound.id,
               imageUrl: imageUrl,
@@ -90,8 +90,6 @@ module.exports = {
       });
   },
   getOnePost: (req, res) => {
-    // Params
-    const postId = parseInt(req.params.PostId);
     models.Post.findOne({
       include: [
         {
@@ -103,7 +101,7 @@ module.exports = {
           attributes: ['id', 'content', 'userId'],
         },
       ],
-      where: { id: postId },
+      where: { id: req.params.PostId },
     })
       .then((post) => {
         if (post) {
@@ -112,22 +110,20 @@ module.exports = {
           res.status(404).json({ error: 'Aucun post trouvé' });
         }
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         res.status(500).json({ error: 'Certains champs sont invalide' });
       });
   },
   updatePost: (req, res) => {
     // Getting userId decoded from middleware auth
-    const userId = req.userId;
+    const UserIdDecoded = req.userId;
 
     // Params
-    let imageUrl = '';
-    const content = req.body.content;
-    const title = req.body.title;
-    const postId = parseInt(req.params.PostId);
+    let ImageUrl = '';
+    const Content = req.body.content;
+    const Title = req.body.title;
     if (req.file) {
-      imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+      ImageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
     }
 
     asyncLib.waterfall(
@@ -135,23 +131,23 @@ module.exports = {
         (done) => {
           models.User.findOne({
             attributes: ['id', 'isAdmin'],
-            where: { id: userId },
+            where: { id: UserIdDecoded },
           })
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
+            .catch(() => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
         },
         (userFound, done) => {
           if (userFound) {
             models.Post.findOne({
               attributes: ['id', 'title', 'content', 'UserId', 'imageUrl'],
-              where: { id: postId },
+              where: { id: req.params.PostId },
             })
               .then((post) => {
                 done(null, post, userFound);
               })
-              .catch((err) => res.status(500).json({ error: 'Impossible de trouver ce post' }));
+              .catch(() => res.status(500).json({ error: 'Impossible de trouver ce post' }));
           } else {
             res.status(404).json({ error: 'Utilisateur introuvable' });
           }
@@ -163,28 +159,28 @@ module.exports = {
               fs.unlink(`images/${oldImageUrl}`, () => {
                 post
                   .update({
-                    title: title ? title : post.title,
-                    content: content ? content : post.content,
-                    imageUrl: imageUrl ? imageUrl : post.imageUrl,
+                    title: Title ? Title : post.title,
+                    content: Content ? Content : post.content,
+                    imageUrl: ImageUrl ? ImageUrl : post.imageUrl,
                   })
                   .then(() => {
                     done(post);
                   })
-                  .catch((err) => {
+                  .catch(() => {
                     res.status(500).json({ message: 'Impossible de modifier ce post' });
                   });
               });
             } else {
               post
                 .update({
-                  title: title ? title : post.title,
-                  content: content ? content : post.content,
-                  imageUrl: imageUrl ? imageUrl : post.imageUrl,
+                  title: Title ? Title : post.title,
+                  content: Content ? Content : post.content,
+                  imageUrl: ImageUrl ? ImageUrl : post.imageUrl,
                 })
                 .then(() => {
                   done(post);
                 })
-                .catch((err) => {
+                .catch(() => {
                   res.status(500).json({ message: 'Impossible de modifier ce post' });
                 });
             }
@@ -205,38 +201,35 @@ module.exports = {
 
   deletePost: (req, res) => {
     // Getting userId decoded from middleware auth
-    const userId = req.userId;
-
-    // Params
-    const postId = parseInt(req.params.PostId);
+    const UserIdDecoded = req.userId;
 
     asyncLib.waterfall(
       [
         (done) => {
           models.User.findOne({
             attributes: ['id', 'isAdmin'],
-            where: { id: userId },
+            where: { id: UserIdDecoded },
           })
             .then((userFound) => {
               done(null, userFound);
             })
-            .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
+            .catch(() => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
         },
         (userFound, done) => {
           if (userFound) {
             models.Post.findOne({
               attributes: ['id', 'UserId', 'imageUrl'],
-              where: { id: postId },
+              where: { id: req.params.PostId },
             })
               .then((post) => {
                 done(null, post, userFound);
               })
-              .catch((err) => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
+              .catch(() => res.status(500).json({ error: 'Impossible de vérifier cet utilisateur' }));
           } else {
             res.status(404).json({ error: 'Utilisateur introuvable' });
           }
         },
-        (post, userFound, done) => {
+        (post, userFound) => {
           if (post.UserId === userFound.id || userFound.isAdmin === true) {
             if (post.imageUrl) {
               const imageName = post.imageUrl.split('/images')[1];
@@ -280,8 +273,7 @@ module.exports = {
           res.status(404).json({ error: 'Aucun post trouvé' });
         }
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         res.status(500).json({ error: 'Problème serveur' });
       });
   },
@@ -296,7 +288,7 @@ module.exports = {
             .then((post) => {
               done(null, post);
             })
-            .catch((err) => res.status(500).json({ error: 'Impossible de trouver ce post' }));
+            .catch(() => res.status(500).json({ error: 'Impossible de trouver ce post' }));
         },
         (post, done) => {
           post
@@ -306,7 +298,7 @@ module.exports = {
             .then(() => {
               done(post);
             })
-            .catch((err) => {
+            .catch(() => {
               res.status(500).json({ error: 'Impossible de signaler le post.' });
             });
         },
@@ -331,7 +323,7 @@ module.exports = {
             .then((post) => {
               done(null, post);
             })
-            .catch((err) => res.status(500).json({ error: 'Impossible de trouver ce post' }));
+            .catch(() => res.status(500).json({ error: 'Impossible de trouver ce post' }));
         },
         (post, done) => {
           post
@@ -342,7 +334,7 @@ module.exports = {
               console.log(post);
               done(post);
             })
-            .catch((err) => {
+            .catch(() => {
               res.status(500).json({ error: 'Impossible de supprimer le signalement.' });
             });
         },

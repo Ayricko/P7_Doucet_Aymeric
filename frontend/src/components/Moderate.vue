@@ -133,8 +133,7 @@ export default {
     deletePost(postId) {
       axios
         .delete(`http://localhost:3000/api/posts/${postId}/`, { headers: { Authorization: this.token } })
-        .then((response) => {
-          console.log(response);
+        .then(() => {
           window.location.reload();
         })
         .catch((err) => {

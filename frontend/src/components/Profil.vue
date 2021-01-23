@@ -7,6 +7,9 @@
       <v-alert v-model="alertUpdateDone" color="green" dense elevation="10" text>
         Modification effectué
       </v-alert>
+      <v-alert v-model="alertDeleteDone" color="green" dense elevation="10" text>
+        Votre compte a été supprimé, vous allez être redirigé!
+      </v-alert>
       <div class="headerProfil">
         <v-avatar size="90" color="#53AFA7">
           <img v-if="avatarUser" :src="avatarUser" alt="image postée par utilisateur" />
@@ -41,7 +44,7 @@
           </div>
         </div>
         <div class="btn">
-          <v-btn color="#B2DFDB" @click="validate">
+          <v-btn color="#B2DFDB" @click="updateAccount">
             Enregister
           </v-btn>
           <v-btn color="#B2DFDB" @click="deleteAccount">
@@ -59,6 +62,7 @@ export default {
   name: 'Profil',
   data() {
     return {
+      token: '',
       user: '',
       lastName: '',
       firstName: '',
@@ -67,35 +71,33 @@ export default {
       show1: false,
       alertUpdate: false,
       alertUpdateDone: false,
+      alertDeleteDone: false,
       alertMessage: '',
     };
   },
 
   mounted() {
-    const token = localStorage.getItem('acces_token');
+    this.token = localStorage.getItem('acces_token');
     axios
-      .get('http://localhost:3000/api/users/profile', { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `${token}` } })
+      .get('http://localhost:3000/api/users/profile', { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: this.token } })
       .then((response) => {
         this.user = response.data.lastName + ' ' + response.data.firstName;
         this.avatarUser = response.data.avatar;
       })
       .catch((err) => {
         console.log(err);
+        this.$router.push('/');
       });
   },
 
   methods: {
-    getAvatar() {
-      this.avatar = this.$refs.file.files[0];
-    },
-    validate() {
-      const token = localStorage.getItem('acces_token');
+    updateAccount() {
       const formData = new FormData();
       formData.append('firstName', this.firstName);
       formData.append('lastName', this.lastName);
       formData.append('image', this.avatar);
       axios
-        .put('http://localhost:3000/api/users/profile', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `${token}` } })
+        .put('http://localhost:3000/api/users/profile', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: this.token } })
         .then(() => {
           window.location.reload();
         })
@@ -105,18 +107,23 @@ export default {
         });
     },
     deleteAccount() {
-      const token = localStorage.getItem('acces_token');
+      function backHome() {
+        window.location.reload();
+      }
       axios
-        .delete('http://localhost:3000/api/users/profile/', { headers: { 'Content-Type': 'application/json', Authorization: `${token}` } })
+        .delete('http://localhost:3000/api/users/profile/', { headers: { 'Content-Type': 'application/json', Authorization: this.token } })
         .then(() => {
-          alert('Votre compte a bien été supprimé');
+          this.alertDeleteDone = true;
           localStorage.removeItem('acces_token');
           localStorage.removeItem('userId');
-          this.$router.push('/');
+          setTimeout(backHome, 1700);
         })
         .catch((err) => {
           console.log(err);
         });
+    },
+    getAvatar() {
+      this.avatar = this.$refs.file.files[0];
     },
     resetImage() {
       this.avatar = '';
