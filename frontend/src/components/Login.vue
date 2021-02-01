@@ -97,8 +97,13 @@ export default {
           this.$router.push('/home');
         })
         .catch((err) => {
-          this.alertAuth = true;
-          this.alertMessage = err.response.data.error;
+          if (err.response.status == 429) {
+            this.alertAuth = true;
+            this.alertMessage = 'Compte bloqué, réessayer dans 15min.';
+          } else {
+            this.alertAuth = true;
+            this.alertMessage = err.response.data.error;
+          }
         });
     },
 
@@ -107,11 +112,9 @@ export default {
       axios
         .post('http://localhost:3000/api/users/register', userRegister)
         .then((response) => {
-          if (response.status === 201) {
-            const token = response.data.token;
-            localStorage.setItem('acces_token', token);
-            this.$router.push('/home');
-          }
+          const token = response.data.token;
+          localStorage.setItem('acces_token', token);
+          this.$router.push('/home');
         })
         .catch((err) => {
           this.alertAuth = true;

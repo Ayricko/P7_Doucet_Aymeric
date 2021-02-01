@@ -7,12 +7,19 @@ const helmet = require('helmet'); // Sécurise les entête HTTP et empeche les a
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+// Limitation du nombre de tentative de connection à 3 essais.
+const rateLimit = require('express-rate-limit');
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, //  15 minutes
+  max: 3, //  Nbr d'essais
+});
+
 // Initialisation sequelize
 db.sequelize
   .authenticate()
   .then(() => {
+    // db.sequelize.sync();
     console.log('Connexion réussie');
-    db.sequelize.sync();
   })
   .catch((err) => {
     console.log('une erreur est survenue', err);
@@ -29,6 +36,7 @@ app.use(cors());
 app.use(helmet());
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/api/users/login', loginLimiter);
 app.use('/api/users', usersRoutes);
 app.use('/api/posts', postsRoutes);
 app.use('/api/comments', commentsRoutes);
