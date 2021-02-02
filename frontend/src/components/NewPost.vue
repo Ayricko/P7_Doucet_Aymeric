@@ -16,6 +16,11 @@
         <div class="Cross">
           <v-icon color="#53AFA7" @click="reset">mdi-close</v-icon>
         </div>
+        <div class="AlertNewPost">
+          <v-alert v-model="alertNewPost" color="red" dismissible rounded elevation="10" text>
+            <div>{{ alertMessage }}</div>
+          </v-alert>
+        </div>
         <h2 class="CardNewPostTitle">Créer une publication</h2>
         <v-form class="InputBloc">
           <v-text-field v-model="title" label="Titre" rows="1" auto-grow></v-text-field>
@@ -62,6 +67,8 @@ export default {
       avatarUser: '',
       showNewPostBloc: false,
       dialog: false,
+      alertNewPost: false,
+      alertMessage: '',
     };
   },
   mounted() {
@@ -87,14 +94,16 @@ export default {
         .post('http://localhost:3000/api/posts/new', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: this.token } })
         .then(() => {
           window.location.reload();
+          this.title = '';
+          this.content = '';
+          this.image = '';
+          this.showNewPostBloc = false;
+          this.alertNewPost = false;
         })
         .catch((err) => {
-          console.log(err);
+          this.alertNewPost = true;
+          this.alertMessage = err.response.data.error;
         });
-      this.title = '';
-      this.content = '';
-      this.image = '';
-      this.showNewPostBloc = false;
     },
     getImage() {
       this.image = this.$refs.file.files[0];
@@ -164,6 +173,9 @@ export default {
   display: flex;
   justify-content: space-around;
   padding: 30px 0 0 0;
+}
+.AlertNewPost {
+  margin: 0 10px;
 }
 @media screen and (max-width: 640px) {
   .PublicationCard {

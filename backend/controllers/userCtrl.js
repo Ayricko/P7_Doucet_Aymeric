@@ -4,6 +4,7 @@ const asyncLib = require('async');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
+
 // Constants
 const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const PASSWORD_REGEX = /^(?=.*[0-9]+.*)(?=.*[a-zA-Z]+.*)[0-9a-zA-Z]{8,}$/;
@@ -77,11 +78,10 @@ module.exports = {
       (newUser) => {
         if (newUser) {
           return res.status(201).json({
-            userId: newUser.id,
+            // userId: newUser.id,
             token: jwt.sign(
               {
                 userId: newUser.id,
-                isAdmin: newUser.isAdmin,
               },
               '$2y$10$y.V7MlX.fKDZuVsUsTnVBeKLpFHssV9AM7SSWSJJYE1Ij0MAgnUxW;',
               {
@@ -136,8 +136,7 @@ module.exports = {
       (userFound) => {
         if (userFound) {
           return res.status(200).json({
-            userId: userFound.id,
-            isAdmin: userFound.isAdmin,
+            // userId: userFound.id,
             token: jwt.sign(
               {
                 userId: userFound.id,

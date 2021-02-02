@@ -3,27 +3,24 @@ const models = require('../models');
 const asyncLib = require('async');
 const fs = require('fs');
 
-// Constants
-const TITLE_LIMIT = 2;
-const CONTENT_LIMIT = 3;
-
 // Routes
 module.exports = {
   createPost: (req, res) => {
-    let imageUrl = '';
     // Getting userId decoded from middleware auth
     const UserIdDecoded = req.userId;
     // Params
+    let imageUrl = '';
     const Title = req.body.title;
     const Content = req.body.content;
+
     if (req.file) {
       imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
     }
-    if (Title == null || Content == null) {
-      return res.status(400).json({ error: 'Vous avez oublié des champs' });
+    if (Title == '') {
+      return res.status(400).json({ error: 'Le titre du post est obligatoire' });
     }
-    if (Title <= TITLE_LIMIT || Content <= CONTENT_LIMIT) {
-      return res.status(400).json({ error: 'Certains champs sont invalides' });
+    if (!req.file && Content == '') {
+      return res.status(400).json({ error: 'Un contenu texte ou une photo est obligatoire' });
     }
     asyncLib.waterfall(
       [

@@ -130,7 +130,7 @@
           <div class="Cross">
             <v-icon color="#53AFA7" @click="closeAlert">mdi-close</v-icon>
           </div>
-          <h2>Modifier votre Post</h2>
+          <h2 class="updatePostTitle">Modifier votre Post</h2>
           <div class="InputBlocUpdate">
             <v-textarea placeholder="Titre" v-model="postUpdateTitle" rows="1" auto-grow></v-textarea>
             <v-textarea placeholder="Que vouliez-vous dire?" v-model="postUpdateContent" rows="1" auto-grow></v-textarea>
@@ -478,6 +478,9 @@ export default {
 }
 .TextUnderDev {
   padding: 0 30px 30px 30px;
+}
+.updatePostTitle {
+  text-align: center;
 }
 @media screen and (max-width: 640px) {
   .Card {
