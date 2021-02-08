@@ -106,7 +106,7 @@ export default {
         this.userId = response.data.id;
       })
       .catch((err) => {
-        console.log(err);
+        console.log(err.response.data);
         this.$router.push('/');
       });
 

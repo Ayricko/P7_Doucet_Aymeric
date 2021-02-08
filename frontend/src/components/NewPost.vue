@@ -101,6 +101,7 @@ export default {
           this.alertNewPost = false;
         })
         .catch((err) => {
+          console.log(err);
           this.alertNewPost = true;
           this.alertMessage = err.response.data.error;
         });

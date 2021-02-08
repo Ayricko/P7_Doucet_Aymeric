@@ -154,6 +154,34 @@ module.exports = {
     );
   },
 
+  deleteUserProfile: (req, res) => {
+    // Getting userId decoded from middleware auth
+    const UserIdDecoded = req.userId;
+
+    models.User.findOne({
+      where: { id: UserIdDecoded },
+    })
+      .then((user) => {
+        if (user) {
+          if (user.avatar) {
+            const avatarName = user.avatar.split('/images')[1];
+            fs.unlink(`images/${avatarName}`, () => {
+              user.destroy(user);
+              res.status(200).json({ message: 'Utilisateur supprimé' });
+            });
+          } else {
+            user.destroy(user);
+            res.status(200).json({ message: 'Utilisateur supprimé' });
+          }
+        } else {
+          res.status(404).json({ error: 'Utilisateur introuvable' });
+        }
+      })
+      .catch(() => {
+        res.status(500).json({ error: "Imposible de charger l'utilisateur" });
+      });
+  },
+
   getUserProfile: (req, res) => {
     // Getting userId decoded from middleware auth
     const UserIdDecoded = req.userId;
@@ -248,33 +276,5 @@ module.exports = {
         }
       }
     );
-  },
-
-  deleteUserProfile: (req, res) => {
-    // Getting userId decoded from middleware auth
-    const UserIdDecoded = req.userId;
-
-    models.User.findOne({
-      where: { id: UserIdDecoded },
-    })
-      .then((user) => {
-        if (user) {
-          if (user.avatar) {
-            const avatarName = user.avatar.split('/images')[1];
-            fs.unlink(`images/${avatarName}`, () => {
-              user.destroy(user);
-              res.status(200).json({ message: 'Utilisateur supprimé' });
-            });
-          } else {
-            user.destroy(user);
-            res.status(200).json({ message: 'Utilisateur supprimé' });
-          }
-        } else {
-          res.status(404).json({ error: 'Utilisateur introuvable' });
-        }
-      })
-      .catch(() => {
-        res.status(500).json({ error: "Imposible de charger l'utilisateur" });
-      });
   },
 };

@@ -18,7 +18,7 @@ const loginLimiter = rateLimit({
 db.sequelize
   .authenticate()
   .then(() => {
-    // db.sequelize.sync();
+    db.sequelize.sync();
     console.log('Connexion réussie');
   })
   .catch((err) => {
